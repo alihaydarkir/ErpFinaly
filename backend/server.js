@@ -57,18 +57,13 @@ app.use('/api/admin', adminRoutes);
 const errorHandler = require('./src/middleware/errorHandler');
 app.use(errorHandler);
 
+// WebSocket handlers
+const WebSocketHandlers = require('./src/websocket/handlers');
+const wsHandlers = new WebSocketHandlers(io);
+
 // WebSocket connection
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-
-  socket.on('message', (data) => {
-    console.log('Message received:', data);
-    // Handle messages
-  });
+  wsHandlers.initializeHandlers(socket);
 });
 
 // Start server
