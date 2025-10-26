@@ -1,99 +1,205 @@
-const pool = require('../config/database');
-const logger = require('../middleware/logger');
+const Product = require('../models/Product');
+const AuditLog = require('../models/AuditLog');
+const cacheService = require('../services/cacheService');
+const { formatProduct, formatProducts, formatSuccess, formatError, formatPaginated } = require('../utils/formatters');
+const { getClientIP, calculateOffset } = require('../utils/helpers');
 
-// Get all products
+/**
+ * Get all products
+ */
 const getAllProducts = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
-    res.json({ products: result.rows });
+    const { category, search, minPrice, maxPrice, lowStock, page = 1, limit = 20 } = req.query;
+
+    // Try to get from cache
+    const cacheKey = `products:${JSON.stringify(req.query)}`;
+    const cached = await cacheService.get(cacheKey);
+
+    if (cached.success && cached.data) {
+      return res.json(formatSuccess(cached.data, 'Products retrieved from cache'));
+    }
+
+    // Build filters
+    const filters = {
+      category,
+      search,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      lowStock: lowStock ? parseInt(lowStock) : undefined,
+      limit: parseInt(limit),
+      offset: calculateOffset(parseInt(page), parseInt(limit))
+    };
+
+    // Get products
+    const products = await Product.findAll(filters);
+    const total = await Product.count({ category });
+
+    const result = formatPaginated(
+      formatProducts(products),
+      total,
+      parseInt(page),
+      parseInt(limit)
+    );
+
+    // Cache result
+    await cacheService.set(cacheKey, result, 300); // 5 minutes
+
+    res.json(result);
+
   } catch (error) {
-    logger.error('Get products error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Get all products error:', error);
+    res.status(500).json(formatError('Failed to fetch products'));
   }
 };
 
-// Get product by id
+/**
+ * Get product by ID
+ */
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
+    // Try to get from cache
+    const cached = await cacheService.getCachedProduct(id);
+    if (cached.success && cached.data) {
+      return res.json(formatSuccess(cached.data));
     }
 
-    res.json({ product: result.rows[0] });
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json(formatError('Product not found'));
+    }
+
+    const formatted = formatProduct(product);
+
+    // Cache product
+    await cacheService.cacheProduct(id, formatted);
+
+    res.json(formatSuccess(formatted));
+
   } catch (error) {
-    logger.error('Get product error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Get product by ID error:', error);
+    res.status(500).json(formatError('Failed to fetch product'));
   }
 };
 
-// Create product
+/**
+ * Create new product
+ */
 const createProduct = async (req, res) => {
   try {
-    const { name, description, sku, category, price, stock_quantity, reorder_level } = req.body;
+    const { name, description, price, stock, category, sku } = req.body;
 
-    const result = await pool.query(
-      'INSERT INTO products (name, description, sku, category, price, stock_quantity, reorder_level) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [name, description, sku, category, price, stock_quantity || 0, reorder_level || 10]
-    );
+    // Check if SKU already exists
+    const existing = await Product.findBySku(sku);
+    if (existing) {
+      return res.status(400).json(formatError('SKU already exists'));
+    }
 
-    logger.info(`Product created: ${sku}`);
-    res.status(201).json({ product: result.rows[0] });
+    const product = await Product.create({
+      name,
+      description,
+      price,
+      stock,
+      category,
+      sku
+    });
+
+    // Log activity
+    await AuditLog.create({
+      user_id: req.user.userId,
+      action: 'CREATE',
+      entity_type: 'product',
+      entity_id: product.id,
+      changes: { name, price, stock, category, sku },
+      ip_address: getClientIP(req)
+    });
+
+    // Invalidate cache
+    await cacheService.invalidateProductCache();
+
+    console.log(`Product created: ${name} (${product.id}) by user ${req.user.userId}`);
+
+    res.status(201).json(formatSuccess(formatProduct(product), 'Product created'));
+
   } catch (error) {
-    logger.error('Create product error:', error);
-    res.status(400).json({ error: error.message });
+    console.error('Create product error:', error);
+    res.status(500).json(formatError('Failed to create product'));
   }
 };
 
-// Update product
+/**
+ * Update product
+ */
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    const setClause = [];
-    const values = [];
-    let paramIndex = 1;
 
-    for (const [key, value] of Object.entries(updates)) {
-      setClause.push(`${key} = $${paramIndex}`);
-      values.push(value);
-      paramIndex++;
+    const product = await Product.update(id, updates);
+
+    if (!product) {
+      return res.status(404).json(formatError('Product not found'));
     }
 
-    values.push(id);
-    const query = `UPDATE products SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+    // Log activity
+    await AuditLog.create({
+      user_id: req.user.userId,
+      action: 'UPDATE',
+      entity_type: 'product',
+      entity_id: id,
+      changes: updates,
+      ip_address: getClientIP(req)
+    });
 
-    const result = await pool.query(query, values);
+    // Invalidate cache
+    await cacheService.invalidateProductCache(id);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    console.log(`Product updated: ${product.name} (${id}) by user ${req.user.userId}`);
 
-    logger.info(`Product updated: ${id}`);
-    res.json({ product: result.rows[0] });
+    res.json(formatSuccess(formatProduct(product), 'Product updated'));
+
   } catch (error) {
-    logger.error('Update product error:', error);
-    res.status(400).json({ error: error.message });
+    console.error('Update product error:', error);
+    res.status(500).json(formatError('Failed to update product'));
   }
 };
 
-// Delete product
+/**
+ * Delete product
+ */
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING *', [id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json(formatError('Product not found'));
     }
 
-    logger.info(`Product deleted: ${id}`);
-    res.json({ message: 'Product deleted successfully' });
+    await Product.delete(id);
+
+    // Log activity
+    await AuditLog.create({
+      user_id: req.user.userId,
+      action: 'DELETE',
+      entity_type: 'product',
+      entity_id: id,
+      changes: { deleted_product: product.name },
+      ip_address: getClientIP(req)
+    });
+
+    // Invalidate cache
+    await cacheService.invalidateProductCache(id);
+
+    console.log(`Product deleted: ${product.name} (${id}) by user ${req.user.userId}`);
+
+    res.json(formatSuccess(null, 'Product deleted'));
+
   } catch (error) {
-    logger.error('Delete product error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Delete product error:', error);
+    res.status(500).json(formatError('Failed to delete product'));
   }
 };
 
@@ -102,6 +208,6 @@ module.exports = {
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct,
+  deleteProduct
 };
 
