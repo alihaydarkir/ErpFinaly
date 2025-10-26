@@ -66,6 +66,10 @@ io.on('connection', (socket) => {
   wsHandlers.initializeHandlers(socket);
 });
 
+// Initialize Redis
+const { connectRedis } = require('./src/config/redis');
+connectRedis().catch(err => console.error('Redis connection error:', err));
+
 // Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

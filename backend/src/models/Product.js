@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const pool = require('../config/database');
 
 class Product {
   /**
@@ -6,7 +6,7 @@ class Product {
    */
   static async create({ name, description, price, stock, category, sku }) {
     const query = `
-      INSERT INTO products (name, description, price, stock, category, sku)
+      INSERT INTO products (name, description, price, stock_quantity, category, sku)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
@@ -67,7 +67,7 @@ class Product {
     }
 
     if (filters.lowStock) {
-      query += ` AND stock < $${paramCount}`;
+      query += ` AND stock_quantity < $${paramCount}`;
       values.push(filters.lowStock);
       paramCount++;
     }
@@ -97,7 +97,7 @@ class Product {
     const values = [];
     let paramCount = 1;
 
-    const allowedFields = ['name', 'description', 'price', 'stock', 'category', 'sku'];
+    const allowedFields = ['name', 'description', 'price', 'stock_quantity', 'category', 'sku'];
 
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
@@ -132,21 +132,21 @@ class Product {
     if (operation === 'increment') {
       query = `
         UPDATE products
-        SET stock = stock + $1, updated_at = NOW()
+        SET stock_quantity = stock_quantity + $1, updated_at = NOW()
         WHERE id = $2
         RETURNING *
       `;
     } else if (operation === 'decrement') {
       query = `
         UPDATE products
-        SET stock = stock - $1, updated_at = NOW()
-        WHERE id = $2 AND stock >= $1
+        SET stock_quantity = stock_quantity - $1, updated_at = NOW()
+        WHERE id = $2 AND stock_quantity >= $1
         RETURNING *
       `;
     } else {
       query = `
         UPDATE products
-        SET stock = $1, updated_at = NOW()
+        SET stock_quantity = $1, updated_at = NOW()
         WHERE id = $2
         RETURNING *
       `;
@@ -169,7 +169,7 @@ class Product {
    * Get low stock products
    */
   static async getLowStock(threshold = 10) {
-    const query = 'SELECT * FROM products WHERE stock < $1 ORDER BY stock ASC';
+    const query = 'SELECT * FROM products WHERE stock_quantity < $1 ORDER BY stock_quantity ASC';
     const result = await pool.query(query, [threshold]);
     return result.rows;
   }

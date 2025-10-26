@@ -1,8 +1,8 @@
-const pool = require('./src/config/database');
+const pool = require('../src/config/database');
 const fs = require('fs');
 const path = require('path');
 
-const migrationsDir = path.join(__dirname, 'migrations');
+const migrationsDir = path.join(__dirname, '../migrations');
 
 const runMigrations = async () => {
   try {

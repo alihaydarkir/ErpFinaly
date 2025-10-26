@@ -83,7 +83,7 @@ const login = async (req, res) => {
     }
 
     // Verify password
-    const isValidPassword = await User.verifyPassword(password, user.password);
+    const isValidPassword = await User.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return res.status(401).json(formatError('Invalid credentials'));
     }

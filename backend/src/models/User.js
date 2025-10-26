@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 
 class User {
@@ -9,7 +9,7 @@ class User {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = `
-      INSERT INTO users (username, email, password, role)
+      INSERT INTO users (username, email, password_hash, role)
       VALUES ($1, $2, $3, $4)
       RETURNING id, username, email, role, created_at
     `;
@@ -80,7 +80,7 @@ class User {
     }
     if (data.password) {
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      fields.push(`password = $${paramCount}`);
+      fields.push(`password_hash = $${paramCount}`);
       values.push(hashedPassword);
       paramCount++;
     }

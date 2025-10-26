@@ -32,7 +32,7 @@ services:
   backend:
     build:
       context: ../backend
-      dockerfile: ../devops/Dockerfile.backend
+      dockerfile: ../devops/Dockerfile.backend.dev
     container_name: erp_backend
     ports:
       - "5001:5000"
@@ -50,7 +50,7 @@ services:
       JWT_EXPIRY: 15m
       JWT_REFRESH_EXPIRY: 7d
       PORT: 5000
-      NODE_ENV: production
+      NODE_ENV: development
       FRONTEND_URL: http://localhost:5000
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -66,24 +66,27 @@ services:
         condition: service_healthy
     volumes:
       - ../backend:/app
+      - /app/node_modules
     restart: unless-stopped
 
   frontend:
     build:
       context: ../frontend
-      dockerfile: ../devops/Dockerfile.frontend
+      dockerfile: ../devops/Dockerfile.frontend.dev
     container_name: erp_frontend
     ports:
-      - "5000:80"
+      - "5000:5173"
     environment:
       VITE_API_URL: http://localhost:5001
       VITE_API_TIMEOUT: 30000
       VITE_SOCKET_URL: http://localhost:5001
     depends_on:
       - backend
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
-
