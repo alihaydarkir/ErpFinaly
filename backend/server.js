@@ -38,6 +38,25 @@ app.get('/', (req, res) => {
   res.json({ message: 'ERP Backend API', version: '2.0', status: 'running' });
 });
 
+// API Routes
+const authRoutes = require('./src/routes/auth');
+const productRoutes = require('./src/routes/products');
+const orderRoutes = require('./src/routes/orders');
+const chatRoutes = require('./src/routes/chat');
+const reportRoutes = require('./src/routes/reports');
+const adminRoutes = require('./src/routes/admin');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Error handling middleware
+const errorHandler = require('./src/middleware/errorHandler');
+app.use(errorHandler);
+
 // WebSocket connection
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
