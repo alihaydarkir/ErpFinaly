@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
+const { logger, requestLogger } = require('./src/middleware/logger');
 
 dotenv.config();
 
@@ -16,6 +17,9 @@ const io = socketIo(server, {
     methods: ['GET', 'POST']
   }
 });
+
+// Request logging middleware (before other middleware)
+app.use(requestLogger);
 
 // Middleware
 app.use(helmet());
@@ -68,11 +72,20 @@ io.on('connection', (socket) => {
 
 // Initialize Redis
 const { connectRedis } = require('./src/config/redis');
-connectRedis().catch(err => console.error('Redis connection error:', err));
+connectRedis()
+  .then(() => logger.info('Redis connected successfully'))
+  .catch(err => {
+    logger.error('Redis connection error:', err);
+    console.error('Redis connection error:', err);
+  });
 
 // Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
+  logger.info(`Server started on port ${PORT}`, {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development'
+  });
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 WebSocket ready`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
