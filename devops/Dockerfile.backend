@@ -2,12 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
 
+# Install ALL dependencies (including devDependencies for nodemon)
+RUN npm install
+
+# Copy rest of the application
 COPY . .
 
 EXPOSE 5000
 
-CMD ["node", "server.js"]
+# Use npm start which will use nodemon in development
+CMD ["npm", "start"]
 
