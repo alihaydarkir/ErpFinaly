@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
+const rbacMiddleware = require('../middleware/rbac');
+const { validate, productSchemas, querySchemas } = require('../utils/validators');
 const {
   getAllProducts,
   getProductById,
@@ -9,11 +11,12 @@ const {
   deleteProduct,
 } = require('../controllers/productController');
 
-router.get('/', getAllProducts);
-router.get('/:id', getProductById);
-router.post('/', authMiddleware, createProduct);
-router.put('/:id', authMiddleware, updateProduct);
-router.delete('/:id', authMiddleware, deleteProduct);
+// All product endpoints now require authentication
+router.get('/', authMiddleware, validate(querySchemas.productFilters, 'query'), getAllProducts);
+router.get('/:id', authMiddleware, getProductById);
+router.post('/', authMiddleware, rbacMiddleware('admin', 'manager'), validate(productSchemas.create), createProduct);
+router.put('/:id', authMiddleware, rbacMiddleware('admin', 'manager'), validate(productSchemas.update), updateProduct);
+router.delete('/:id', authMiddleware, rbacMiddleware('admin'), deleteProduct);
 
 module.exports = router;
 

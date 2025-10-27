@@ -18,9 +18,9 @@ export default function LoginPage() {
 
     try {
       const response = await authService.login(email, password);
-      
+
       if (response.success) {
-        login(response.data.token, response.data.user);
+        login(response.data.token, response.data.user, response.data.refreshToken);
         navigate('/dashboard');
       }
     } catch (err) {

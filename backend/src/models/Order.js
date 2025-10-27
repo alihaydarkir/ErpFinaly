@@ -2,6 +2,15 @@ const pool = require('../config/database');
 
 class Order {
   /**
+   * Generate unique order number
+   */
+  static generateOrderNumber() {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `ORD-${timestamp}-${random}`;
+  }
+
+  /**
    * Create a new order
    */
   static async create({ user_id, items, total_amount, status = 'pending' }) {
@@ -10,13 +19,16 @@ class Order {
     try {
       await client.query('BEGIN');
 
+      // Generate unique order number
+      const orderNumber = this.generateOrderNumber();
+
       // Create order
       const orderQuery = `
-        INSERT INTO orders (user_id, total_amount, status)
-        VALUES ($1, $2, $3)
+        INSERT INTO orders (user_id, order_number, total_amount, status)
+        VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
-      const orderResult = await client.query(orderQuery, [user_id, total_amount, status]);
+      const orderResult = await client.query(orderQuery, [user_id, orderNumber, total_amount, status]);
       const order = orderResult.rows[0];
 
       // Create order items
@@ -36,8 +48,8 @@ class Order {
         // Update product stock
         const stockQuery = `
           UPDATE products
-          SET stock = stock - $1
-          WHERE id = $2 AND stock >= $1
+          SET stock_quantity = stock_quantity - $1
+          WHERE id = $2 AND stock_quantity >= $1
         `;
         const stockResult = await client.query(stockQuery, [item.quantity, item.product_id]);
 
@@ -85,38 +97,58 @@ class Order {
   }
 
   /**
-   * Get all orders with filters
+   * Get all orders with filters (Optimized - no N+1 query problem)
    */
   static async findAll(filters = {}) {
-    let query = 'SELECT * FROM orders WHERE 1=1';
+    let query = `
+      SELECT
+        o.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'product_id', oi.product_id,
+              'quantity', oi.quantity,
+              'price', oi.price,
+              'name', p.name,
+              'sku', p.sku
+            ) ORDER BY oi.id
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE 1=1
+    `;
     const values = [];
     let paramCount = 1;
 
     if (filters.user_id) {
-      query += ` AND user_id = $${paramCount}`;
+      query += ` AND o.user_id = $${paramCount}`;
       values.push(filters.user_id);
       paramCount++;
     }
 
     if (filters.status) {
-      query += ` AND status = $${paramCount}`;
+      query += ` AND o.status = $${paramCount}`;
       values.push(filters.status);
       paramCount++;
     }
 
     if (filters.start_date) {
-      query += ` AND created_at >= $${paramCount}`;
+      query += ` AND o.created_at >= $${paramCount}`;
       values.push(filters.start_date);
       paramCount++;
     }
 
     if (filters.end_date) {
-      query += ` AND created_at <= $${paramCount}`;
+      query += ` AND o.created_at <= $${paramCount}`;
       values.push(filters.end_date);
       paramCount++;
     }
 
-    query += ' ORDER BY created_at DESC';
+    query += ' GROUP BY o.id ORDER BY o.created_at DESC';
 
     if (filters.limit) {
       query += ` LIMIT $${paramCount}`;
@@ -131,22 +163,11 @@ class Order {
 
     const result = await pool.query(query, values);
 
-    // Get items for each order
-    const orders = await Promise.all(
-      result.rows.map(async (order) => {
-        const itemsQuery = `
-          SELECT oi.*, p.name, p.sku
-          FROM order_items oi
-          JOIN products p ON oi.product_id = p.id
-          WHERE oi.order_id = $1
-        `;
-        const itemsResult = await pool.query(itemsQuery, [order.id]);
-        order.items = itemsResult.rows;
-        return order;
-      })
-    );
-
-    return orders;
+    // Parse JSON items (PostgreSQL returns them as JSON strings)
+    return result.rows.map(order => ({
+      ...order,
+      items: typeof order.items === 'string' ? JSON.parse(order.items) : order.items
+    }));
   }
 
   /**
