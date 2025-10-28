@@ -18,6 +18,9 @@ const io = socketIo(server, {
   }
 });
 
+// Trust proxy (nginx forwards requests)
+app.set('trust proxy', true);
+
 // Request logging middleware (before other middleware)
 app.use(requestLogger);
 
