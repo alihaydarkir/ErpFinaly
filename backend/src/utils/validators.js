@@ -8,19 +8,19 @@ const Joi = require('joi');
 const userSchemas = {
   register: Joi.object({
     username: Joi.string().min(3).max(30).required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().min(6).required(),
     role: Joi.string().valid('admin', 'manager', 'user').default('user')
   }),
 
   login: Joi.object({
-    email: Joi.string().email().required(),
+    email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().required()
   }),
 
   updateUser: Joi.object({
     username: Joi.string().min(3).max(30),
-    email: Joi.string().email(),
+    email: Joi.string().email({ tlds: { allow: false } }),
     password: Joi.string().min(6),
     role: Joi.string().valid('admin', 'manager', 'user')
   }).min(1)
