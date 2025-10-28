@@ -127,12 +127,15 @@ const querySchemas = {
  */
 const validate = (schema, property = 'body') => {
   return (req, res, next) => {
+    console.log(`VALIDATING ${property}:`, JSON.stringify(req[property], null, 2));
+
     const { error, value } = schema.validate(req[property], {
       abortEarly: false,
       stripUnknown: true
     });
 
     if (error) {
+      console.log('VALIDATION ERROR:', error.details);
       const errors = error.details.map(detail => ({
         field: detail.path.join('.'),
         message: detail.message
