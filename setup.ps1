@@ -1,13 +1,14 @@
 # ERP System Quick Start Script for Windows
 # Run this in PowerShell: .\setup.ps1
 
-Write-Host "🚀 ERP Sistemi Kurulumu Başlıyor..." -ForegroundColor Green
+Write-Host "[BASLANGIC] ERP Sistemi Kurulumu Basliyor..." -ForegroundColor Green
 
 # Check if Docker is running
 try {
     docker ps | Out-Null
+    Write-Host "[OK] Docker calisiyor" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Docker çalışmıyor. Lütfen Docker Desktop'ı başlatın." -ForegroundColor Red
+    Write-Host "[HATA] Docker calismiyor. Lutfen Docker Desktop'i baslatin." -ForegroundColor Red
     exit 1
 }
 
@@ -16,7 +17,7 @@ Set-Location -Path $PSScriptRoot\devops
 
 # Create .env file if not exists
 if (-not (Test-Path ".env")) {
-    Write-Host "📝 .env dosyası oluşturuluyor..." -ForegroundColor Yellow
+    Write-Host "[ISLEM] .env dosyasi olusturuluyor..." -ForegroundColor Yellow
 
     # Generate random secrets
     $DB_PASSWORD = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
@@ -49,26 +50,33 @@ SMTP_USER=
 SMTP_PASSWORD=
 "@ | Out-File -FilePath .env -Encoding utf8
 
-    Write-Host "✅ .env dosyası oluşturuldu" -ForegroundColor Green
+    Write-Host "[OK] .env dosyasi olusturuldu" -ForegroundColor Green
 } else {
-    Write-Host "✅ .env dosyası mevcut" -ForegroundColor Green
+    Write-Host "[OK] .env dosyasi mevcut" -ForegroundColor Green
 }
 
 # Stop existing containers
-Write-Host "🛑 Eski container'lar durduruluyor..." -ForegroundColor Yellow
+Write-Host "[ISLEM] Eski container'lar durduruluyor..." -ForegroundColor Yellow
 docker compose down 2>$null
 
 # Start Docker containers
-Write-Host "🐳 Docker container'ları başlatılıyor..." -ForegroundColor Yellow
+Write-Host "[ISLEM] Docker container'lari baslatiliyor..." -ForegroundColor Yellow
 docker compose up -d
 
 # Wait for services to be ready
-Write-Host "⏳ Servisler hazırlanıyor (20 saniye)..." -ForegroundColor Yellow
+Write-Host "[BEKLE] Servisler hazirlaniyor (20 saniye)..." -ForegroundColor Yellow
 Start-Sleep -Seconds 20
 
+# Check backend status
+Write-Host "[KONTROL] Backend durumu kontrol ediliyor..." -ForegroundColor Yellow
+$backendStatus = docker ps --filter "name=erp_backend" --format "{{.Status}}"
+Write-Host "[DURUM] Backend: $backendStatus" -ForegroundColor Cyan
+
 # Run database migrations
-Write-Host "🗄️ Database migration'ları çalıştırılıyor..." -ForegroundColor Yellow
-docker exec erp_backend node -e @"
+Write-Host "[ISLEM] Database migration'lari calistiriliyor..." -ForegroundColor Yellow
+
+# Create migration script file
+$migrationScript = @'
 const pool = require('./src/config/database');
 const fs = require('fs');
 const path = require('path');
@@ -82,21 +90,28 @@ async function runMigrations() {
       console.log('Running:', file);
       const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
       await pool.query(sql);
-      console.log('✅', file);
+      console.log('OK:', file);
     }
-    console.log('Migration tamamlandı!');
+    console.log('Migration tamamlandi!');
   } catch (err) {
-    console.log('Migration uyarısı:', err.message);
+    console.log('Migration uyarisi:', err.message);
   } finally {
     process.exit(0);
   }
 }
 runMigrations();
-"@
+'@
+
+$migrationScript | Out-File -FilePath migration-temp.js -Encoding utf8
+docker cp migration-temp.js erp_backend:/app/migration-temp.js
+docker exec erp_backend node migration-temp.js
+Remove-Item migration-temp.js
 
 # Create test users
-Write-Host "👤 Test kullanıcıları oluşturuluyor..." -ForegroundColor Yellow
-docker exec erp_backend node -e @"
+Write-Host "[ISLEM] Test kullanicilari olusturuluyor..." -ForegroundColor Yellow
+
+# Create user creation script
+$userScript = @'
 const pool = require('./src/config/database');
 const bcrypt = require('bcrypt');
 
@@ -111,46 +126,51 @@ async function createUsers() {
     for (const user of users) {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       await pool.query(
-        'INSERT INTO users (email, password, name, role) VALUES (\$1, \$2, \$3, \$4) ON CONFLICT (email) DO NOTHING',
+        'INSERT INTO users (email, password, name, role) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING',
         [user.email, hashedPassword, user.name, user.role]
       );
-      console.log('✅', user.email);
+      console.log('OK:', user.email);
     }
-    console.log('Kullanıcılar oluşturuldu!');
+    console.log('Kullanicilar olusturuldu!');
   } catch (err) {
-    console.log('Kullanıcı uyarısı:', err.message);
+    console.log('Kullanici uyarisi:', err.message);
   } finally {
     process.exit(0);
   }
 }
 createUsers();
-"@
+'@
+
+$userScript | Out-File -FilePath user-temp.js -Encoding utf8
+docker cp user-temp.js erp_backend:/app/user-temp.js
+docker exec erp_backend node user-temp.js
+Remove-Item user-temp.js
 
 # Check status
 Write-Host ""
-Write-Host "🎉 Kurulum Tamamlandı!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "   KURULUM TAMAMLANDI!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "📊 Servis Durumu:" -ForegroundColor Cyan
+
+Write-Host "[DURUM] Servis Durumu:" -ForegroundColor Cyan
 docker compose ps
 
 Write-Host ""
-Write-Host "🌐 Erişim Adresleri:" -ForegroundColor Cyan
+Write-Host "[ERISIM] Erisim Adresleri:" -ForegroundColor Cyan
 Write-Host "  Frontend:    http://localhost:5000" -ForegroundColor White
 Write-Host "  Backend API: http://localhost:5001" -ForegroundColor White
 
 Write-Host ""
-Write-Host "👤 Test Kullanıcıları:" -ForegroundColor Cyan
+Write-Host "[KULLANICI] Test Kullanicilari:" -ForegroundColor Cyan
 Write-Host "  Admin:   admin@erp.local / admin123" -ForegroundColor White
 Write-Host "  Manager: manager@erp.local / manager123" -ForegroundColor White
 Write-Host "  User:    user@erp.local / user123" -ForegroundColor White
 
 Write-Host ""
-Write-Host "📝 Logları Görüntüle:" -ForegroundColor Cyan
-Write-Host "  docker compose logs -f backend" -ForegroundColor White
+Write-Host "[KOMUT] Faydali Komutlar:" -ForegroundColor Cyan
+Write-Host "  Loglari izle:      docker compose logs -f backend" -ForegroundColor White
+Write-Host "  Servisleri durdur: docker compose down" -ForegroundColor White
 
 Write-Host ""
-Write-Host "🛑 Servisleri Durdur:" -ForegroundColor Cyan
-Write-Host "  docker compose down" -ForegroundColor White
-
-Write-Host ""
-Write-Host "✅ Sisteme giriş yapabilirsiniz: http://localhost:5000" -ForegroundColor Green
+Write-Host "[BASARI] Sisteme giris yapabilirsiniz: http://localhost:5000" -ForegroundColor Green
