@@ -74,6 +74,7 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
   try {
+    console.log('LOGIN REQUEST:', JSON.stringify(req.body, null, 2));
     const { email, password } = req.body;
 
     // Find user by email
