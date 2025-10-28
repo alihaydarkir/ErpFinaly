@@ -33,15 +33,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  validate: {xForwardedForHeader: false} // Skip validation for proxied requests
-});
-app.use('/api/', limiter);
+// Rate limiting - TEMPORARILY DISABLED for proxy compatibility
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   validate: {xForwardedForHeader: false}
+// });
+// app.use('/api/', limiter);
 
 // Routes
 app.get('/', (req, res) => {
