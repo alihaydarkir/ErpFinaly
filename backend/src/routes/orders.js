@@ -12,7 +12,7 @@ const {
 } = require('../controllers/orderController');
 
 // All order endpoints require authentication
-router.get('/', authMiddleware, validate(querySchemas.orderFilters, 'query'), getAllOrders);
+router.get('/', authMiddleware, validate(querySchemas.filters, 'query'), getAllOrders);
 router.get('/:id', authMiddleware, getOrderById);
 router.post('/', authMiddleware, validate(orderSchemas.create), createOrder);
 router.put('/:id', authMiddleware, validate(orderSchemas.update), updateOrder);

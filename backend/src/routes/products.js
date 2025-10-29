@@ -12,7 +12,7 @@ const {
 } = require('../controllers/productController');
 
 // All product endpoints now require authentication
-router.get('/', authMiddleware, validate(querySchemas.productFilters, 'query'), getAllProducts);
+router.get('/', authMiddleware, validate(querySchemas.filters, 'query'), getAllProducts);
 router.get('/:id', authMiddleware, getProductById);
 router.post('/', authMiddleware, rbacMiddleware('admin', 'manager'), validate(productSchemas.create), createProduct);
 router.put('/:id', authMiddleware, rbacMiddleware('admin', 'manager'), validate(productSchemas.update), updateProduct);
