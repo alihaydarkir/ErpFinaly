@@ -18,6 +18,9 @@ const io = socketIo(server, {
   }
 });
 
+// Trust proxy (for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Request logging middleware (before other middleware)
 app.use(requestLogger);
 
