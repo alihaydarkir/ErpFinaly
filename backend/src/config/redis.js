@@ -3,30 +3,54 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
-});
+let redisClient = null;
+let isRedisConnected = false;
 
-redisClient.on('error', (err) => {
-  console.error('❌ Redis error:', err);
-});
+// Create Redis client with optional connection
+const createRedisClient = () => {
+  const client = redis.createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    socket: {
+      reconnectStrategy: false // Disable auto-reconnect to prevent spam
+    }
+  });
 
-redisClient.on('connect', () => {
-  console.log('✅ Redis connected');
-});
+  client.on('error', (err) => {
+    if (!isRedisConnected) {
+      console.log('⚠️  Redis not available - running without cache');
+    }
+  });
 
-// Connect to Redis
+  client.on('connect', () => {
+    isRedisConnected = true;
+    console.log('✅ Redis connected');
+  });
+
+  return client;
+};
+
+// Connect to Redis (optional - app will work without it)
 const connectRedis = async () => {
   try {
+    redisClient = createRedisClient();
     await redisClient.connect();
-    console.log('✅ Redis connected');
+    isRedisConnected = true;
+    console.log('✅ Redis connected successfully');
   } catch (error) {
-    console.error('❌ Redis connection error:', error);
+    console.log('⚠️  Redis connection failed - running without cache');
+    isRedisConnected = false;
+    redisClient = null;
   }
 };
 
+// Safe get function
+const getRedisClient = () => {
+  return isRedisConnected ? redisClient : null;
+};
+
 module.exports = {
-  redisClient,
+  redisClient: getRedisClient,
   connectRedis,
+  isRedisConnected: () => isRedisConnected,
 };
 
