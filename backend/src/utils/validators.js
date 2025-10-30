@@ -8,19 +8,19 @@ const Joi = require('joi');
 const userSchemas = {
   register: Joi.object({
     username: Joi.string().min(3).max(30).required(),
-    email: Joi.string().email().required(),
+    email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().min(6).required(),
     role: Joi.string().valid('admin', 'manager', 'user').default('user')
   }),
 
   login: Joi.object({
-    email: Joi.string().email().required(),
+    email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().required()
   }),
 
   updateUser: Joi.object({
     username: Joi.string().min(3).max(30),
-    email: Joi.string().email(),
+    email: Joi.string().email({ tlds: { allow: false } }),
     password: Joi.string().min(6),
     role: Joi.string().valid('admin', 'manager', 'user')
   }).min(1)
@@ -64,16 +64,20 @@ const orderSchemas = {
       })
     ).min(1).required(),
     total_amount: Joi.number().min(0).required(),
-    status: Joi.string().valid('pending', 'completed', 'cancelled').default('pending')
+    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').default('pending')
   }),
 
   update: Joi.object({
-    status: Joi.string().valid('pending', 'completed', 'cancelled'),
+    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
     total_amount: Joi.number().min(0)
   }).min(1),
 
   updateStatus: Joi.object({
-    status: Joi.string().valid('pending', 'completed', 'cancelled').required()
+    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').required()
+  }),
+
+  cancel: Joi.object({
+    reason: Joi.string().max(500).allow('', null)
   })
 };
 
@@ -118,7 +122,28 @@ const querySchemas = {
     search: Joi.string(),
     minPrice: Joi.number().min(0),
     maxPrice: Joi.number().min(0),
-    lowStock: Joi.number().integer().min(0)
+    lowStock: Joi.number().integer().min(0),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  orderFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    status: Joi.string(),
+    start_date: Joi.date().iso(),
+    end_date: Joi.date().iso(),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  productFilters: Joi.object({
+    category: Joi.string(),
+    search: Joi.string(),
+    minPrice: Joi.number().min(0),
+    maxPrice: Joi.number().min(0),
+    lowStock: Joi.number().integer().min(0),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
   })
 };
 

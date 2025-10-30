@@ -28,7 +28,7 @@ const formatProduct = (product) => {
   return {
     ...product,
     price: parseFloat(product.price),
-    stock: parseInt(product.stock),
+    stock: parseInt(product.stock_quantity || product.stock || 0),
     created_at: product.created_at ? new Date(product.created_at).toISOString() : null,
     updated_at: product.updated_at ? new Date(product.updated_at).toISOString() : null
   };

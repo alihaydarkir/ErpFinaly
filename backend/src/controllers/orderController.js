@@ -5,6 +5,7 @@ const emailService = require('../services/emailService');
 const cacheService = require('../services/cacheService');
 const { formatOrder, formatOrders, formatSuccess, formatError, formatPaginated } = require('../utils/formatters');
 const { getClientIP, calculateOffset } = require('../utils/helpers');
+const { ORDER_STATUS, isValidStatusTransition, getNextStatuses } = require('../constants/orderStatus');
 
 /**
  * Get all orders
@@ -184,11 +185,125 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+/**
+ * Update order status
+ */
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!Object.values(ORDER_STATUS).includes(status)) {
+      return res.status(400).json(formatError(`Invalid status. Allowed: ${Object.values(ORDER_STATUS).join(', ')}`));
+    }
+
+    // Get current order
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json(formatError('Order not found'));
+    }
+
+    // Check if status transition is valid
+    if (!isValidStatusTransition(order.status, status)) {
+      const nextStatuses = getNextStatuses(order.status);
+      return res.status(400).json(
+        formatError(`Cannot change status from '${order.status}' to '${status}'. Allowed: ${nextStatuses.join(', ') || 'none (final state)'}`)
+      );
+    }
+
+    // Update status
+    const updatedOrder = await Order.updateStatus(id, status);
+
+    // Log activity
+    await AuditLog.create({
+      user_id: req.user.userId,
+      action: 'UPDATE_STATUS',
+      entity_type: 'order',
+      entity_id: id,
+      changes: { old_status: order.status, new_status: status },
+      ip_address: getClientIP(req)
+    });
+
+    // Invalidate cache
+    await cacheService.invalidateOrderCache();
+
+    // Send status update email
+    const user = await User.findById(order.user_id);
+    emailService.sendOrderStatusUpdateEmail(updatedOrder, user, status).catch(err =>
+      console.error('Order status update email error:', err)
+    );
+
+    console.log(`Order #${id} status updated: ${order.status} → ${status}`);
+
+    res.json(formatSuccess(formatOrder(updatedOrder), 'Order status updated'));
+
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json(formatError('Failed to update order status'));
+  }
+};
+
+/**
+ * Cancel order (restore stock)
+ */
+const cancelOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    // Get current order
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json(formatError('Order not found'));
+    }
+
+    // Check if order can be cancelled
+    if (!isValidStatusTransition(order.status, ORDER_STATUS.CANCELLED)) {
+      return res.status(400).json(
+        formatError(`Cannot cancel order with status '${order.status}'. Order is already in final state.`)
+      );
+    }
+
+    // Cancel order (will restore stock automatically)
+    const cancelledOrder = await Order.cancel(id);
+
+    // Log activity
+    await AuditLog.create({
+      user_id: req.user.userId,
+      action: 'CANCEL',
+      entity_type: 'order',
+      entity_id: id,
+      changes: { old_status: order.status, new_status: ORDER_STATUS.CANCELLED, reason },
+      ip_address: getClientIP(req)
+    });
+
+    // Invalidate cache
+    await cacheService.invalidateOrderCache();
+
+    // Send cancellation email
+    const user = await User.findById(order.user_id);
+    emailService.sendOrderCancellationEmail(cancelledOrder, user, reason).catch(err =>
+      console.error('Order cancellation email error:', err)
+    );
+
+    console.log(`Order #${id} cancelled by user ${req.user.userId}. Reason: ${reason || 'N/A'}`);
+
+    res.json(formatSuccess(formatOrder(cancelledOrder), 'Order cancelled successfully'));
+
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json(formatError('Failed to cancel order'));
+  }
+};
+
 module.exports = {
   getAllOrders,
   getOrderById,
   createOrder,
   updateOrder,
+  updateOrderStatus,
+  cancelOrder,
   deleteOrder
 };
 

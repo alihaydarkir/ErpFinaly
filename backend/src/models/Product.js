@@ -35,6 +35,15 @@ class Product {
   }
 
   /**
+   * Find product by name
+   */
+  static async findByName(name) {
+    const query = 'SELECT * FROM products WHERE name = $1';
+    const result = await pool.query(query, [name]);
+    return result.rows[0];
+  }
+
+  /**
    * Get all products with filters
    */
   static async findAll(filters = {}) {

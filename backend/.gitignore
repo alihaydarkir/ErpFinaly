@@ -1,5 +1,6 @@
 node_modules/
 .env
+.env.local
 *.log
 .DS_Store
 coverage/
@@ -8,4 +9,6 @@ coverage/
 dist/
 build/
 *.sql.backup
+uploads/
+logs/
 
