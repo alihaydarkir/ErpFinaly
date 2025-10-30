@@ -235,7 +235,7 @@ class Order {
       for (const item of itemsResult.rows) {
         const stockQuery = `
           UPDATE products
-          SET stock = stock + $1
+          SET stock_quantity = stock_quantity + $1
           WHERE id = $2
         `;
         await client.query(stockQuery, [item.quantity, item.product_id]);
