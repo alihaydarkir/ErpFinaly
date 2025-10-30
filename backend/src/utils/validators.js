@@ -122,7 +122,18 @@ const querySchemas = {
     search: Joi.string(),
     minPrice: Joi.number().min(0),
     maxPrice: Joi.number().min(0),
-    lowStock: Joi.number().integer().min(0)
+    lowStock: Joi.number().integer().min(0),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  orderFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    status: Joi.string(),
+    start_date: Joi.date().iso(),
+    end_date: Joi.date().iso(),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
   })
 };
 
