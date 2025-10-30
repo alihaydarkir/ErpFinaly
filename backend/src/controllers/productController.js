@@ -11,14 +11,6 @@ const getAllProducts = async (req, res) => {
   try {
     const { category, search, minPrice, maxPrice, lowStock, page = 1, limit = 20 } = req.query;
 
-    // Try to get from cache
-    const cacheKey = `products:${JSON.stringify(req.query)}`;
-    const cached = await cacheService.get(cacheKey);
-
-    if (cached.success && cached.data) {
-      return res.json(formatSuccess(cached.data, 'Products retrieved from cache'));
-    }
-
     // Build filters
     const filters = {
       category,
@@ -40,9 +32,6 @@ const getAllProducts = async (req, res) => {
       parseInt(page),
       parseInt(limit)
     );
-
-    // Cache result
-    await cacheService.set(cacheKey, result, 300); // 5 minutes
 
     res.json(result);
 

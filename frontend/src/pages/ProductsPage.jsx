@@ -36,14 +36,16 @@ export default function ProductsPage() {
     try {
       if (editingProduct) {
         await productService.update(editingProduct.id, formData);
+        alert('✅ Ürün başarıyla güncellendi!');
       } else {
         await productService.create(formData);
+        alert('✅ Ürün başarıyla eklendi!');
       }
       setShowModal(false);
       resetForm();
-      fetchProducts();
+      await fetchProducts();
     } catch (error) {
-      alert(error.response?.data?.message || 'Hata oluştu!');
+      alert('❌ Hata: ' + (error.response?.data?.message || 'İşlem başarısız!'));
     }
   };
 
@@ -64,9 +66,10 @@ export default function ProductsPage() {
     if (window.confirm(`"${name}" ürününü silmek istediğinize emin misiniz?`)) {
       try {
         await productService.delete(id);
-        fetchProducts();
+        alert('✅ Ürün başarıyla silindi!');
+        await fetchProducts();
       } catch (error) {
-        alert('Silme işlemi başarısız!');
+        alert('❌ Hata: Silme işlemi başarısız!');
       }
     }
   };
