@@ -5,16 +5,16 @@ class User {
   /**
    * Create a new user
    */
-  static async create({ username, email, password, role = 'user' }) {
+  static async create({ username, email, password, role = 'user', full_name = null }) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = `
-      INSERT INTO users (username, email, password_hash, role)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, username, email, role, created_at
+      INSERT INTO users (username, email, password_hash, role, full_name)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, username, email, role, full_name, created_at
     `;
 
-    const values = [username, email, hashedPassword, role];
+    const values = [username, email, hashedPassword, role, full_name];
     const result = await pool.query(query, values);
     return result.rows[0];
   }

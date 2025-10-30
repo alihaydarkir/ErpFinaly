@@ -41,36 +41,31 @@ async function seedDatabase() {
 async function createUsers() {
   const users = [];
 
-  try {
-    // Admin user
-    const admin = await User.create({
-      username: 'admin',
-      email: 'admin@erp.local',
-      password: 'admin123',
-      role: 'admin'
-    });
-    users.push(admin);
+  const sampleUsers = [
+    { username: 'admin', email: 'admin@erp.local', password: 'admin123', role: 'admin', full_name: 'Admin User' },
+    { username: 'manager', email: 'manager@erp.local', password: 'manager123', role: 'manager', full_name: 'Manager User' },
+    { username: 'user', email: 'user@erp.local', password: 'user123', role: 'user', full_name: 'Regular User' }
+  ];
 
-    // Manager user
-    const manager = await User.create({
-      username: 'manager',
-      email: 'manager@erp.local',
-      password: 'manager123',
-      role: 'manager'
-    });
-    users.push(manager);
+  for (const userData of sampleUsers) {
+    try {
+      // Check if user already exists
+      const existingUser = await User.findByUsername(userData.username);
 
-    // Regular user
-    const user = await User.create({
-      username: 'user',
-      email: 'user@erp.local',
-      password: 'user123',
-      role: 'user'
-    });
-    users.push(user);
+      if (existingUser) {
+        console.log(`  ⏭️  SKIP: User '${userData.username}' already exists`);
+        users.push(existingUser);
+        continue;
+      }
 
-  } catch (error) {
-    console.error('Error creating users:', error.message);
+      // Create new user
+      const user = await User.create(userData);
+      console.log(`  ✅ CREATED: User '${userData.username}'`);
+      users.push(user);
+
+    } catch (error) {
+      console.error(`  ❌ ERROR: Failed to create user '${userData.username}': ${error.message}`);
+    }
   }
 
   return users;
@@ -123,13 +118,25 @@ async function createProducts() {
 
   for (const item of sampleProducts) {
     try {
+      // Check if product already exists by name
+      const existingProduct = await Product.findByName(item.name);
+
+      if (existingProduct) {
+        console.log(`  ⏭️  SKIP: Product '${item.name}' already exists`);
+        products.push(existingProduct);
+        continue;
+      }
+
+      // Create new product
       const product = await Product.create({
         ...item,
         sku: generateSKU(item.category.substring(0, 3).toUpperCase())
       });
+      console.log(`  ✅ CREATED: Product '${item.name}'`);
       products.push(product);
+
     } catch (error) {
-      console.error(`Error creating product ${item.name}:`, error.message);
+      console.error(`  ❌ ERROR: Failed to create product '${item.name}': ${error.message}`);
     }
   }
 
