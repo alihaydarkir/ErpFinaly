@@ -134,6 +134,16 @@ const querySchemas = {
     end_date: Joi.date().iso(),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  productFilters: Joi.object({
+    category: Joi.string(),
+    search: Joi.string(),
+    minPrice: Joi.number().min(0),
+    maxPrice: Joi.number().min(0),
+    lowStock: Joi.number().integer().min(0),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20)
   })
 };
 
