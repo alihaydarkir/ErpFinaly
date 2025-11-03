@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
+import ImportProductsDialog from '../components/Products/ImportProductsDialog';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -99,12 +101,20 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold text-gray-800">Ürünler</h1>
           <p className="text-gray-600 mt-2">Ürün yönetimi ve stok takibi</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-        >
-          + Yeni Ürün
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowImportDialog(true)}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+          >
+            📥 Excel'den Yükle
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            + Yeni Ürün
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -268,6 +278,16 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+
+      {/* Import Dialog */}
+      <ImportProductsDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onSuccess={() => {
+          fetchProducts();
+          setShowImportDialog(false);
+        }}
+      />
     </div>
   );
 }
