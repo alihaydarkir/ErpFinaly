@@ -74,7 +74,12 @@ class Order {
    * Find order by ID with items
    */
   static async findById(id) {
-    const orderQuery = 'SELECT * FROM orders WHERE id = $1';
+    const orderQuery = `
+      SELECT o.*, u.name as user_name, u.email as user_email
+      FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
+      WHERE o.id = $1
+    `;
     const orderResult = await pool.query(orderQuery, [id]);
 
     if (orderResult.rows.length === 0) {
@@ -103,6 +108,8 @@ class Order {
     let query = `
       SELECT
         o.*,
+        u.name as user_name,
+        u.email as user_email,
         COALESCE(
           json_agg(
             json_build_object(
@@ -117,6 +124,7 @@ class Order {
           '[]'
         ) as items
       FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
       LEFT JOIN order_items oi ON o.id = oi.order_id
       LEFT JOIN products p ON oi.product_id = p.id
       WHERE 1=1

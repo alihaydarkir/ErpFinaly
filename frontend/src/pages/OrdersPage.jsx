@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { orderService } from '../services/orderService';
 import OrderDrawer from '../components/Orders/OrderDrawer';
+import OrderDetailModal from '../components/Orders/OrderDetailModal';
 import PendingOrdersSection from '../components/Orders/PendingOrdersSection';
 import CompletedOrdersSection from '../components/Orders/CompletedOrdersSection';
 
@@ -8,6 +9,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showOrderDrawer, setShowOrderDrawer] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
@@ -55,10 +57,16 @@ export default function OrdersPage() {
     }
   };
 
-  const handleViewOrder = (order) => {
-    setSelectedOrder(order);
-    // TODO: Open order detail modal
-    alert(`Sipariş #${order.id} detayları:\n\nToplam: ₺${order.total_amount}\nÜrün Sayısı: ${order.items?.length || 0}`);
+  const handleViewOrder = async (order) => {
+    try {
+      // Fetch full order details with items
+      const response = await orderService.getById(order.id);
+      setSelectedOrder(response.data);
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error('Failed to fetch order details:', error);
+      alert('❌ Sipariş detayları yüklenemedi');
+    }
   };
 
   // Filter orders by status
@@ -104,6 +112,16 @@ export default function OrdersPage() {
         onSuccess={() => {
           fetchOrders();
           setShowOrderDrawer(false);
+        }}
+      />
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        order={selectedOrder}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedOrder(null);
         }}
       />
     </div>
