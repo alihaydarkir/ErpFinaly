@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 import ImportProductsDialog from '../components/Products/ImportProductsDialog';
+import CategoryFilter from '../components/Products/CategoryFilter';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -19,12 +21,16 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await productService.getAll({ limit: 100 });
+      const params = { limit: 100 };
+      if (selectedCategory) {
+        params.category = selectedCategory;
+      }
+      const response = await productService.getAll(params);
       setProducts(response.data || []);
     } catch (error) {
       console.error('Products fetch error:', error);
@@ -95,8 +101,9 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Ürünler</h1>
           <p className="text-gray-600 mt-2">Ürün yönetimi ve stok takibi</p>
@@ -116,6 +123,19 @@ export default function ProductsPage() {
           </button>
         </div>
       </div>
+
+      {/* Main Content: Sidebar + Products Table */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Left Sidebar - Category Filter */}
+        <div className="col-span-3">
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+
+        {/* Right Content - Products Table */}
+        <div className="col-span-9">
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -199,6 +219,8 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+        </div>
+      </div>
 
       {/* Modal */}
       {showModal && (

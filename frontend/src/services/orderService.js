@@ -25,6 +25,16 @@ export const orderService = {
     const response = await api.delete(`/api/orders/${id}`);
     return response.data;
   },
+
+  updateStatus: async (id, status) => {
+    const response = await api.patch(`/api/orders/${id}/status`, { status });
+    return response.data;
+  },
+
+  cancel: async (id, reason = '') => {
+    const response = await api.post(`/api/orders/${id}/cancel`, { reason });
+    return response.data;
+  },
 };
 
 
