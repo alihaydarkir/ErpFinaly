@@ -20,19 +20,20 @@ export default function DashboardPage() {
     try {
       // Fetch products
       const productsRes = await productService.getAll({ limit: 100 });
-      const totalProducts = productsRes.data?.total || 0;
-      
+      const totalProducts = productsRes.data?.length || 0;
+
       // Get low stock products
       const lowStockRes = await productService.getAll({ lowStock: 10, limit: 100 });
-      const lowStockProducts = lowStockRes.data?.data?.length || 0;
+      const lowStockProducts = lowStockRes.data?.length || 0;
 
       // Fetch orders
       const ordersRes = await orderService.getAll({ limit: 100 });
-      const totalOrders = ordersRes.data?.total || 0;
-      const pendingOrders = ordersRes.data?.data?.filter(o => o.status === 'pending').length || 0;
+      const ordersData = ordersRes.data || [];
+      const totalOrders = ordersData.length || 0;
+      const pendingOrders = ordersData.filter(o => o.status === 'pending').length || 0;
 
       // Calculate revenue
-      const completedOrders = ordersRes.data?.data?.filter(o => o.status === 'completed') || [];
+      const completedOrders = ordersData.filter(o => o.status === 'completed') || [];
       const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
 
       setStats({

@@ -23,7 +23,7 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       const response = await productService.getAll({ limit: 100 });
-      setProducts(response.data?.data || []);
+      setProducts(response.data || []);
     } catch (error) {
       console.error('Products fetch error:', error);
     } finally {

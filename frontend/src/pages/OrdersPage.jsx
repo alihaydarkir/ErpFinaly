@@ -18,7 +18,7 @@ export default function OrdersPage() {
         params.status = statusFilter;
       }
       const response = await orderService.getAll(params);
-      setOrders(response.data?.data || []);
+      setOrders(response.data || []);
     } catch (error) {
       console.error('Orders fetch error:', error);
     } finally {
