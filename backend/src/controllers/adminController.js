@@ -24,17 +24,18 @@ const getAllUsers = async (req, res) => {
 
     const formattedUsers = users.map(user => formatUser(user));
 
-    const total = await User.count(filters);
+    const total = await User.count({ role: filters.role, status: filters.status });
 
-    res.json(formatSuccess({
-      users: formattedUsers,
+    res.json({
+      success: true,
+      data: formattedUsers,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
         pages: Math.ceil(total / parseInt(limit))
       }
-    }));
+    });
 
   } catch (error) {
     console.error('Get all users error:', error);

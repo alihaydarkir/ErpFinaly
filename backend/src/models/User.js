@@ -49,14 +49,33 @@ class User {
   /**
    * Get all users
    */
-  static async findAll(limit = 100, offset = 0) {
-    const query = `
-      SELECT id, username, email, role, created_at
+  static async findAll(filters = {}) {
+    const { limit = 100, offset = 0, role, status } = filters;
+
+    let query = `
+      SELECT id, username, email, full_name, role, is_active, created_at
       FROM users
-      ORDER BY created_at DESC
-      LIMIT $1 OFFSET $2
+      WHERE 1=1
     `;
-    const result = await pool.query(query, [limit, offset]);
+    const values = [];
+    let paramCount = 1;
+
+    if (role) {
+      query += ` AND role = $${paramCount}`;
+      values.push(role);
+      paramCount++;
+    }
+
+    if (status !== undefined) {
+      query += ` AND is_active = $${paramCount}`;
+      values.push(status === 'active');
+      paramCount++;
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+    values.push(limit, offset);
+
+    const result = await pool.query(query, values);
     return result.rows;
   }
 
@@ -125,9 +144,25 @@ class User {
   /**
    * Count total users
    */
-  static async count() {
-    const query = 'SELECT COUNT(*) FROM users';
-    const result = await pool.query(query);
+  static async count(filters = {}) {
+    const { role, status } = filters;
+
+    let query = 'SELECT COUNT(*) FROM users WHERE 1=1';
+    const values = [];
+    let paramCount = 1;
+
+    if (role) {
+      query += ` AND role = $${paramCount}`;
+      values.push(role);
+      paramCount++;
+    }
+
+    if (status !== undefined) {
+      query += ` AND is_active = $${paramCount}`;
+      values.push(status === 'active');
+    }
+
+    const result = await pool.query(query, values);
     return parseInt(result.rows[0].count);
   }
 }
