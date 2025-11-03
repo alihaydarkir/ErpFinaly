@@ -11,6 +11,7 @@ export default function OrdersPage() {
   const [showOrderDrawer, setShowOrderDrawer] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchOrders();
@@ -69,9 +70,27 @@ export default function OrdersPage() {
     }
   };
 
+  // Filter orders by search term
+  const filteredOrders = orders.filter(order => {
+    if (!searchTerm) return true;
+
+    const searchLower = searchTerm.toLowerCase();
+    const orderId = order.id?.toString() || '';
+    const orderNumber = order.order_number?.toLowerCase() || '';
+    const userName = order.user_name?.toLowerCase() || '';
+    const userEmail = order.user_email?.toLowerCase() || '';
+
+    return (
+      orderId.includes(searchLower) ||
+      orderNumber.includes(searchLower) ||
+      userName.includes(searchLower) ||
+      userEmail.includes(searchLower)
+    );
+  });
+
   // Filter orders by status
-  const pendingOrders = orders.filter(order => order.status === 'pending');
-  const completedOrders = orders.filter(order => order.status === 'completed');
+  const pendingOrders = filteredOrders.filter(order => order.status === 'pending');
+  const completedOrders = filteredOrders.filter(order => order.status === 'completed');
 
   return (
     <div className="p-6 space-y-6">
@@ -87,6 +106,35 @@ export default function OrdersPage() {
         >
           + Yeni Sipariş
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl shadow-sm border p-4">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Sipariş ara (ID, sipariş no, müşteri adı veya email)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 pl-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">
+            🔍
+          </span>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {searchTerm && (
+          <p className="text-sm text-gray-500 mt-2">
+            {filteredOrders.length} sipariş bulundu
+          </p>
+        )}
       </div>
 
       {/* Pending Orders Section */}
