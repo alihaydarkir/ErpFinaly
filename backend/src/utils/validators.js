@@ -64,16 +64,16 @@ const orderSchemas = {
       })
     ).min(1).required(),
     total_amount: Joi.number().min(0).required(),
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').default('pending')
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').default('pending')
   }),
 
   update: Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
     total_amount: Joi.number().min(0)
   }).min(1),
 
   updateStatus: Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').required()
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').required()
   }),
 
   cancel: Joi.object({
