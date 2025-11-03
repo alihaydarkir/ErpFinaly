@@ -3,6 +3,7 @@
  */
 const ORDER_STATUS = {
   PENDING: 'pending',
+  COMPLETED: 'completed',
   CONFIRMED: 'confirmed',
   PROCESSING: 'processing',
   SHIPPED: 'shipped',
@@ -16,7 +17,8 @@ const ORDER_STATUS = {
  * Defines which status transitions are allowed
  */
 const ORDER_STATUS_WORKFLOW = {
-  pending: ['confirmed', 'cancelled'],
+  pending: ['completed', 'confirmed', 'cancelled'],
+  completed: [], // Final state
   confirmed: ['processing', 'cancelled'],
   processing: ['shipped', 'cancelled'],
   shipped: ['delivered', 'cancelled'],

@@ -182,12 +182,23 @@ class Order {
    * Update order status
    */
   static async updateStatus(id, status) {
-    const query = `
-      UPDATE orders
-      SET status = $1, updated_at = NOW()
-      WHERE id = $2
-      RETURNING *
-    `;
+    // Set completed_at if status is completed or delivered
+    const isCompletedStatus = ['completed', 'delivered'].includes(status);
+
+    const query = isCompletedStatus
+      ? `
+        UPDATE orders
+        SET status = $1, completed_at = NOW(), updated_at = NOW()
+        WHERE id = $2
+        RETURNING *
+      `
+      : `
+        UPDATE orders
+        SET status = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING *
+      `;
+
     const result = await pool.query(query, [status, id]);
     return result.rows[0];
   }
