@@ -144,7 +144,7 @@ export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
               <option value="">Müşteri Seçin</option>
               {customers.map(customer => (
                 <option key={customer.id} value={customer.id}>
-                  {customer.name} ({customer.email})
+                  {customer.full_name || customer.username} ({customer.email})
                 </option>
               ))}
             </select>

@@ -75,7 +75,7 @@ class Order {
    */
   static async findById(id) {
     const orderQuery = `
-      SELECT o.*, u.name as user_name, u.email as user_email
+      SELECT o.*, u.full_name as user_name, u.email as user_email
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
       WHERE o.id = $1
@@ -108,7 +108,7 @@ class Order {
     let query = `
       SELECT
         o.*,
-        u.name as user_name,
+        u.full_name as user_name,
         u.email as user_email,
         COALESCE(
           json_agg(
