@@ -165,7 +165,7 @@ class BulkImportService {
 
       // Create audit log
       const auditQuery = `
-        INSERT INTO audit_logs (user_id, action, entity_type, details, created_at)
+        INSERT INTO audit_logs (user_id, action, entity_type, changes, created_at)
         VALUES ($1, $2, $3, $4, NOW())
       `;
 
