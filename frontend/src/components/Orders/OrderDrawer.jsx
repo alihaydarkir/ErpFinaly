@@ -1,35 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { orderService } from '../../services/orderService';
 import OrderCart from './OrderCart';
 import AddProductToOrder from './AddProductToOrder';
+import CustomerSearch from './CustomerSearch';
 
 export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchCustomers();
-    }
-  }, [isOpen]);
-
-  const fetchCustomers = async () => {
-    try {
-      // Fetch users for customer selection
-      const response = await fetch('http://localhost:5000/api/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      setCustomers(data.data || []);
-    } catch (error) {
-      console.error('Failed to fetch customers:', error);
-    }
-  };
 
   const handleAddToCart = (product) => {
     // Check if product already exists in cart
@@ -88,7 +67,7 @@ export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
 
       // Create order
       await orderService.create({
-        user_id: parseInt(selectedCustomer),
+        user_id: selectedCustomer.id,
         items: items,
         total_amount: totalAmount,
         status: 'pending'
@@ -106,7 +85,7 @@ export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
   };
 
   const handleClose = () => {
-    setSelectedCustomer('');
+    setSelectedCustomer(null);
     setOrderDate(new Date().toISOString().split('T')[0]);
     setCartItems([]);
     onClose();
@@ -131,24 +110,10 @@ export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Customer Selection */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Müşteri
-            </label>
-            <select
-              value={selectedCustomer}
-              onChange={(e) => setSelectedCustomer(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="">Müşteri Seçin</option>
-              {customers.map(customer => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.full_name || customer.username} ({customer.email})
-                </option>
-              ))}
-            </select>
-          </div>
+          <CustomerSearch
+            selectedCustomer={selectedCustomer}
+            onSelectCustomer={setSelectedCustomer}
+          />
 
           {/* Date */}
           <div>
