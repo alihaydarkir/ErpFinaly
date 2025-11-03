@@ -148,10 +148,15 @@ curl http://localhost:5000
 | Servis | Port | URL | Durum |
 |--------|------|-----|-------|
 | Backend API | 5000 | http://localhost:5000 | Aktif |
-| Frontend | 5173 | http://localhost:5173 | Aktif |
-| PostgreSQL | 5432 | localhost:5432 | Opsiyonel |
-| Redis | 6379 | localhost:6379 | Opsiyonel |
+| Frontend (Vite) | 5173 | http://localhost:5173 | Aktif |
+| PostgreSQL | 5432 | localhost:5432 | **Gerekli** (Docker) |
+| Redis | 6379 | localhost:6379 | Opsiyonel (Docker) |
 | Ollama | 11434 | http://localhost:11434 | Opsiyonel |
+
+**NOT:** PostgreSQL **zorunludur**. Docker ile başlatın:
+```bash
+docker-compose up -d postgres redis
+```
 
 ---
 
