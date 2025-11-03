@@ -172,6 +172,64 @@ class EmailService {
   }
 
   /**
+   * Send order status update email
+   */
+  async sendOrderStatusUpdateEmail(order, user, newStatus) {
+    const html = `
+      <h1>Order Status Update</h1>
+      <p>Hi ${user.username || user.full_name},</p>
+      <p>Your order #${order.id} status has been updated.</p>
+      <h3>Order Details:</h3>
+      <ul>
+        <li>Order ID: ${order.id}</li>
+        <li>New Status: <strong>${newStatus}</strong></li>
+        <li>Total Amount: $${order.total_amount}</li>
+        <li>Updated: ${new Date().toLocaleString()}</li>
+      </ul>
+      <br>
+      <p>Thank you for your patience!</p>
+      <p>Best regards,<br>ERP Team</p>
+    `;
+
+    return await this.sendEmail({
+      to: user.email,
+      subject: `Order Status Update #${order.id}`,
+      html,
+      text: `Your order #${order.id} status is now: ${newStatus}`
+    });
+  }
+
+  /**
+   * Send order cancellation email
+   */
+  async sendOrderCancellationEmail(order, user, reason) {
+    const html = `
+      <h1>Order Cancelled</h1>
+      <p>Hi ${user.username || user.full_name},</p>
+      <p>Your order #${order.id} has been cancelled.</p>
+      <h3>Order Details:</h3>
+      <ul>
+        <li>Order ID: ${order.id}</li>
+        <li>Total Amount: $${order.total_amount}</li>
+        <li>Cancellation Date: ${new Date().toLocaleString()}</li>
+        ${reason ? `<li>Reason: ${reason}</li>` : ''}
+      </ul>
+      <p>The stock has been restored and any charges will be refunded within 5-7 business days.</p>
+      <br>
+      <p>If you have any questions, please contact our support team.</p>
+      <p>Best regards,<br>ERP Team</p>
+    `;
+
+    return await this.sendEmail({
+      to: user.email,
+      subject: `Order Cancelled #${order.id}`,
+      html,
+      text: `Your order #${order.id} has been cancelled. ${reason ? 'Reason: ' + reason : ''}`,
+      priority: 'high'
+    });
+  }
+
+  /**
    * Send low stock alert email
    */
   async sendLowStockAlert(products, adminEmail) {

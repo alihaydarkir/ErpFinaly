@@ -1,4 +1,4 @@
-const { redisClient } = require('../config/redis');
+const { redisClient, isRedisConnected } = require('../config/redis');
 
 class CacheService {
   constructor() {
@@ -6,12 +6,29 @@ class CacheService {
   }
 
   /**
+   * Get Redis client safely
+   */
+  getClient() {
+    return redisClient();
+  }
+
+  /**
+   * Check if Redis is available
+   */
+  isAvailable() {
+    return isRedisConnected();
+  }
+
+  /**
    * Set a value in cache
    */
   async set(key, value, ttl = this.defaultTTL) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
+      const client = this.getClient();
       const serialized = JSON.stringify(value);
-      await redisClient.setEx(key, ttl, serialized);
+      await client.setEx(key, ttl, serialized);
       return { success: true };
     } catch (error) {
       console.error('Cache set error:', error.message);
@@ -23,8 +40,11 @@ class CacheService {
    * Get a value from cache
    */
   async get(key) {
+    if (!this.isAvailable()) return { success: false, data: null };
+
     try {
-      const value = await redisClient.get(key);
+      const client = this.getClient();
+      const value = await client.get(key);
       if (!value) {
         return { success: false, data: null };
       }
@@ -40,8 +60,11 @@ class CacheService {
    * Delete a value from cache
    */
   async delete(key) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      await redisClient.del(key);
+      const client = this.getClient();
+      await client.del(key);
       return { success: true };
     } catch (error) {
       console.error('Cache delete error:', error.message);
@@ -53,10 +76,13 @@ class CacheService {
    * Delete all keys matching a pattern
    */
   async deletePattern(pattern) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      const keys = await redisClient.keys(pattern);
+      const client = this.getClient();
+      const keys = await client.keys(pattern);
       if (keys.length > 0) {
-        await redisClient.del(keys);
+        await client.del(keys);
       }
       return { success: true, deleted: keys.length };
     } catch (error) {
@@ -69,8 +95,11 @@ class CacheService {
    * Check if a key exists
    */
   async exists(key) {
+    if (!this.isAvailable()) return { success: false, exists: false };
+
     try {
-      const exists = await redisClient.exists(key);
+      const client = this.getClient();
+      const exists = await client.exists(key);
       return { success: true, exists: exists === 1 };
     } catch (error) {
       console.error('Cache exists error:', error.message);
@@ -82,8 +111,11 @@ class CacheService {
    * Set expiration time for a key
    */
   async expire(key, ttl) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      await redisClient.expire(key, ttl);
+      const client = this.getClient();
+      await client.expire(key, ttl);
       return { success: true };
     } catch (error) {
       console.error('Cache expire error:', error.message);
@@ -95,8 +127,11 @@ class CacheService {
    * Increment a value
    */
   async increment(key, amount = 1) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      const value = await redisClient.incrBy(key, amount);
+      const client = this.getClient();
+      const value = await client.incrBy(key, amount);
       return { success: true, value };
     } catch (error) {
       console.error('Cache increment error:', error.message);
@@ -108,8 +143,11 @@ class CacheService {
    * Decrement a value
    */
   async decrement(key, amount = 1) {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      const value = await redisClient.decrBy(key, amount);
+      const client = this.getClient();
+      const value = await client.decrBy(key, amount);
       return { success: true, value };
     } catch (error) {
       console.error('Cache decrement error:', error.message);
@@ -239,8 +277,11 @@ class CacheService {
    * Flush all cache
    */
   async flushAll() {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      await redisClient.flushAll();
+      const client = this.getClient();
+      await client.flushAll();
       return { success: true };
     } catch (error) {
       console.error('Cache flush error:', error.message);
@@ -252,8 +293,11 @@ class CacheService {
    * Get cache statistics
    */
   async getStats() {
+    if (!this.isAvailable()) return { success: false, error: 'Redis not available' };
+
     try {
-      const info = await redisClient.info('stats');
+      const client = this.getClient();
+      const info = await client.info('stats');
       return { success: true, stats: info };
     } catch (error) {
       console.error('Cache stats error:', error.message);
