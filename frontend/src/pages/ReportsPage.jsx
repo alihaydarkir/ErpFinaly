@@ -27,8 +27,8 @@ export default function ReportsPage() {
       const productsRes = await productService.getAll({ limit: 100 });
       const ordersRes = await orderService.getAll({ limit: 100 });
 
-      const products = productsRes.data?.data || [];
-      const orders = ordersRes.data?.data || [];
+      const products = productsRes.data || [];
+      const orders = ordersRes.data || [];
 
       // Calculate stats
       const completedOrders = orders.filter((o) => o.status === 'completed');
