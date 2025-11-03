@@ -20,11 +20,10 @@ async function seedDatabase() {
     const products = await createProducts();
     console.log(`✅ Created ${products.length} products\n`);
 
-    // 3. Create sample orders (optional)
-    // Uncomment if you want to seed orders
-    // console.log('Creating orders...');
-    // const orders = await createOrders(users, products);
-    // console.log(`✅ Created ${orders.length} orders\n`);
+    // 3. Create sample orders
+    console.log('Creating orders...');
+    const orders = await createOrders(users, products);
+    console.log(`✅ Created ${orders.length} orders\n`);
 
     console.log('🎉 Database seeding completed successfully!');
     process.exit(0);
