@@ -11,7 +11,7 @@ export default function CategoryFilter({ selectedCategory, onCategoryChange }) {
 
   const fetchCategories = async () => {
     try {
-      const response = await productService.getAll({ limit: 1000 });
+      const response = await productService.getAll({ limit: 100 });
       const products = response.data || [];
 
       // Extract unique categories and count products
