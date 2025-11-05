@@ -21,27 +21,28 @@ function App() {
     const loadTheme = () => {
       try {
         const savedPrefs = localStorage.getItem('userPreferences');
+        const root = document.documentElement;
+
         if (savedPrefs) {
           const prefs = JSON.parse(savedPrefs);
           const theme = prefs.theme || 'light';
 
-          // Remove existing theme classes
-          document.body.classList.remove('theme-light', 'theme-dark');
+          // Remove dark class
+          root.classList.remove('dark');
 
-          if (theme === 'auto') {
+          if (theme === 'dark') {
+            root.classList.add('dark');
+          } else if (theme === 'auto') {
             // Use system preference
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
-          } else {
-            document.body.classList.add(`theme-${theme}`);
+            if (isDark) {
+              root.classList.add('dark');
+            }
           }
-        } else {
-          // Default to light theme
-          document.body.classList.add('theme-light');
         }
+        // Default is light (no class needed)
       } catch (error) {
         console.error('Failed to load theme:', error);
-        document.body.classList.add('theme-light');
       }
     };
 
@@ -55,8 +56,11 @@ function App() {
         if (savedPrefs) {
           const prefs = JSON.parse(savedPrefs);
           if (prefs.theme === 'auto') {
-            document.body.classList.remove('theme-light', 'theme-dark');
-            document.body.classList.add(mediaQuery.matches ? 'theme-dark' : 'theme-light');
+            const root = document.documentElement;
+            root.classList.remove('dark');
+            if (mediaQuery.matches) {
+              root.classList.add('dark');
+            }
           }
         }
       } catch (error) {

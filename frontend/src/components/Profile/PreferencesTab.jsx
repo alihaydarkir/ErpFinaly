@@ -7,18 +7,11 @@ const PreferencesTab = ({ profile }) => {
 
   const [preferences, setPreferences] = useState({
     theme: 'light',
-    language: 'tr',
     notifications: {
       email: true,
       browser: true,
       lowStock: true,
       newOrders: true
-    },
-    dashboard: {
-      showSales: true,
-      showOrders: true,
-      showProducts: true,
-      showCustomers: true
     }
   });
 
@@ -31,18 +24,11 @@ const PreferencesTab = ({ profile }) => {
 
       setPreferences({
         theme: prefs.theme || 'light',
-        language: prefs.language || 'tr',
         notifications: prefs.notifications || {
           email: true,
           browser: true,
           lowStock: true,
           newOrders: true
-        },
-        dashboard: prefs.dashboard || {
-          showSales: true,
-          showOrders: true,
-          showProducts: true,
-          showCustomers: true
         }
       });
     }
@@ -55,29 +41,12 @@ const PreferencesTab = ({ profile }) => {
     }));
   };
 
-  const handleLanguageChange = (e) => {
-    setPreferences((prev) => ({
-      ...prev,
-      language: e.target.value
-    }));
-  };
-
   const handleNotificationChange = (key) => {
     setPreferences((prev) => ({
       ...prev,
       notifications: {
         ...prev.notifications,
         [key]: !prev.notifications[key]
-      }
-    }));
-  };
-
-  const handleDashboardChange = (key) => {
-    setPreferences((prev) => ({
-      ...prev,
-      dashboard: {
-        ...prev.dashboard,
-        [key]: !prev.dashboard[key]
       }
     }));
   };
@@ -101,16 +70,21 @@ const PreferencesTab = ({ profile }) => {
   };
 
   const applyTheme = (theme) => {
-    // Remove existing theme classes
-    document.body.classList.remove('theme-light', 'theme-dark');
+    const root = document.documentElement;
 
-    if (theme === 'auto') {
+    // Remove existing theme class
+    root.classList.remove('dark');
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'auto') {
       // Use system preference
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
-    } else {
-      document.body.classList.add(`theme-${theme}`);
+      if (isDark) {
+        root.classList.add('dark');
+      }
     }
+    // 'light' theme doesn't need any class
   };
 
   return (
@@ -199,49 +173,6 @@ const PreferencesTab = ({ profile }) => {
                 disabled={isLoading}
               />
               <span>Yeni sipariş bildirimleri</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Dashboard Section */}
-        <div className="preference-section">
-          <h4>📊 Dashboard Görünümü</h4>
-          <div className="preference-checkboxes">
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={preferences.dashboard.showSales}
-                onChange={() => handleDashboardChange('showSales')}
-                disabled={isLoading}
-              />
-              <span>Satış grafiğini göster</span>
-            </label>
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={preferences.dashboard.showOrders}
-                onChange={() => handleDashboardChange('showOrders')}
-                disabled={isLoading}
-              />
-              <span>Sipariş listesini göster</span>
-            </label>
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={preferences.dashboard.showProducts}
-                onChange={() => handleDashboardChange('showProducts')}
-                disabled={isLoading}
-              />
-              <span>Ürün istatistiklerini göster</span>
-            </label>
-            <label className="checkbox-option">
-              <input
-                type="checkbox"
-                checked={preferences.dashboard.showCustomers}
-                onChange={() => handleDashboardChange('showCustomers')}
-                disabled={isLoading}
-              />
-              <span>Müşteri bilgilerini göster</span>
             </label>
           </div>
         </div>

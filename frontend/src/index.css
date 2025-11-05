@@ -16,7 +16,7 @@
   --card-bg: #ffffff;
 }
 
-body.theme-dark {
+.dark {
   --bg-primary: #1a1d23;
   --bg-secondary: #22262e;
   --bg-tertiary: #2c313a;
