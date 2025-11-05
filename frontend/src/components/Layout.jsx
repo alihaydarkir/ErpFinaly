@@ -20,6 +20,8 @@ export default function Layout({ children }) {
     { path: '/products', label: 'Ürünler', icon: '📦' },
     { path: '/orders', label: 'Siparişler', icon: '🛒' },
     { path: '/customers', label: 'Müşteriler', icon: '👥' },
+    { path: '/suppliers', label: 'Tedarikçiler', icon: '🏭' },
+    { path: '/purchase-orders', label: 'Satın Alma', icon: '📋' },
     { path: '/chat', label: 'AI Chatbot', icon: '🤖' },
     { path: '/reports', label: 'Raporlar', icon: '📈' },
   ];

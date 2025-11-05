@@ -182,6 +182,138 @@ const querySchemas = {
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(50),
     offset: Joi.number().integer().min(0).default(0)
+  }),
+
+  supplierFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    search: Joi.string(),
+    is_active: Joi.string().valid('true', 'false'),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(50),
+    offset: Joi.number().integer().min(0).default(0)
+  }),
+
+  purchaseOrderFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    supplier_id: Joi.number().integer(),
+    status: Joi.string().valid('draft', 'sent', 'confirmed', 'partial', 'received', 'cancelled'),
+    search: Joi.string(),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(50),
+    offset: Joi.number().integer().min(0).default(0)
+  })
+};
+
+// Supplier validation schemas
+const supplierSchemas = {
+  create: Joi.object({
+    company_name: Joi.string().min(3).max(255).required(),
+    contact_name: Joi.string().max(255).allow('', null),
+    email: Joi.string().email({ tlds: { allow: false } }).allow('', null),
+    tax_number: Joi.string().min(10).max(50).required(),
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    location: Joi.string().max(255).allow('', null),
+    payment_terms: Joi.string().valid('Net 30', 'Net 60', 'Peşin', 'Net 15', 'Net 90').default('Net 30'),
+    lead_time_days: Joi.number().integer().min(0).default(7),
+    min_order_quantity: Joi.number().integer().min(1).default(1),
+    risk_level: Joi.string().valid('Low', 'Medium', 'High').default('Medium'),
+    website: Joi.string().uri().allow('', null),
+    notes: Joi.string().allow('', null),
+    is_active: Joi.boolean().default(true),
+    rating: Joi.number().min(0).max(5).default(5.0)
+  }),
+
+  update: Joi.object({
+    company_name: Joi.string().min(3).max(255),
+    contact_name: Joi.string().max(255).allow('', null),
+    email: Joi.string().email({ tlds: { allow: false } }).allow('', null),
+    tax_number: Joi.string().min(10).max(50),
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    location: Joi.string().max(255).allow('', null),
+    payment_terms: Joi.string().valid('Net 30', 'Net 60', 'Peşin', 'Net 15', 'Net 90'),
+    lead_time_days: Joi.number().integer().min(0),
+    min_order_quantity: Joi.number().integer().min(1),
+    risk_level: Joi.string().valid('Low', 'Medium', 'High'),
+    website: Joi.string().uri().allow('', null),
+    notes: Joi.string().allow('', null),
+    is_active: Joi.boolean(),
+    rating: Joi.number().min(0).max(5)
+  }).min(1)
+};
+
+// Purchase Order validation schemas
+const purchaseOrderSchemas = {
+  create: Joi.object({
+    supplier_id: Joi.number().integer().required(),
+    items: Joi.array().items(
+      Joi.object({
+        product_id: Joi.number().integer().required(),
+        quantity: Joi.number().integer().min(1).required(),
+        unit_price: Joi.number().min(0).required(),
+        notes: Joi.string().allow('', null)
+      })
+    ).min(1).required(),
+    expected_delivery: Joi.date().iso().allow(null),
+    notes: Joi.string().allow('', null)
+  }),
+
+  update: Joi.object({
+    supplier_id: Joi.number().integer(),
+    status: Joi.string().valid('draft', 'sent', 'confirmed', 'partial', 'received', 'cancelled'),
+    expected_delivery: Joi.date().iso().allow(null),
+    actual_delivery: Joi.date().iso().allow(null),
+    notes: Joi.string().allow('', null)
+  }).min(1),
+
+  receive: Joi.object({
+    items: Joi.array().items(
+      Joi.object({
+        po_item_id: Joi.number().integer().required(),
+        received_quantity: Joi.number().integer().min(1).required()
+      })
+    ).min(1).required()
+  })
+};
+
+// Supplier Price validation schemas
+const supplierPriceSchemas = {
+  create: Joi.object({
+    product_id: Joi.number().integer().required(),
+    price: Joi.number().min(0).required(),
+    currency: Joi.string().length(3).uppercase().default('TRY'),
+    minimum_quantity: Joi.number().integer().min(1).default(1),
+    discount_percentage: Joi.number().min(0).max(100).default(0),
+    valid_from: Joi.date().iso().allow(null),
+    valid_to: Joi.date().iso().min(Joi.ref('valid_from')).allow(null)
+  }),
+
+  update: Joi.object({
+    price: Joi.number().min(0),
+    currency: Joi.string().length(3).uppercase(),
+    minimum_quantity: Joi.number().integer().min(1),
+    discount_percentage: Joi.number().min(0).max(100),
+    valid_from: Joi.date().iso().allow(null),
+    valid_to: Joi.date().iso().allow(null)
+  }).min(1),
+
+  bulkImport: Joi.object({
+    prices: Joi.array().items(
+      Joi.object({
+        product_id: Joi.number().integer().required(),
+        price: Joi.number().min(0).required(),
+        currency: Joi.string().length(3).uppercase().default('TRY'),
+        minimum_quantity: Joi.number().integer().min(1).default(1),
+        discount_percentage: Joi.number().min(0).max(100).default(0),
+        valid_from: Joi.date().iso().allow(null),
+        valid_to: Joi.date().iso().allow(null)
+      })
+    ).min(1).required()
   })
 };
 
@@ -221,6 +353,9 @@ module.exports = {
   chatSchemas,
   ragSchemas,
   customerSchemas,
+  supplierSchemas,
+  purchaseOrderSchemas,
+  supplierPriceSchemas,
   querySchemas,
   validate
 };
