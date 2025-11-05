@@ -56,6 +56,7 @@ const productSchemas = {
 const orderSchemas = {
   create: Joi.object({
     user_id: Joi.number().integer().required(),
+    customer_id: Joi.number().integer().optional().allow(null),
     items: Joi.array().items(
       Joi.object({
         product_id: Joi.number().integer().required(),
@@ -68,6 +69,7 @@ const orderSchemas = {
   }),
 
   update: Joi.object({
+    customer_id: Joi.number().integer().optional().allow(null),
     status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
     total_amount: Joi.number().min(0)
   }).min(1),

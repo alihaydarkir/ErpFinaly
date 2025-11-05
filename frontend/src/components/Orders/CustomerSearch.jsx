@@ -26,7 +26,7 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/admin/users', {
+      const response = await fetch('http://localhost:5000/api/customers?limit=100', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -40,8 +40,7 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
       setCustomers(data.data || []);
     } catch (error) {
       console.error('Failed to fetch customers:', error);
-      // Show error to user
-      alert('Müşteri listesi yüklenemedi. Lütfen admin olarak giriş yaptığınızdan emin olun.');
+      alert('Müşteri listesi yüklenemedi.');
     } finally {
       setLoading(false);
     }
@@ -51,14 +50,15 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
     if (!searchTerm) return true;
 
     const search = searchTerm.toLowerCase();
-    const name = (customer.full_name || customer.username || '').toLowerCase();
-    const email = (customer.email || '').toLowerCase();
+    const name = (customer.full_name || '').toLowerCase();
+    const company = (customer.company_name || '').toLowerCase();
+    const taxNumber = (customer.tax_number || '').toLowerCase();
 
-    return name.includes(search) || email.includes(search);
+    return name.includes(search) || company.includes(search) || taxNumber.includes(search);
   });
 
   const handleSelect = (customer) => {
-    setSearchTerm(customer.full_name || customer.username);
+    setSearchTerm(`${customer.full_name} - ${customer.company_name}`);
     setShowDropdown(false);
     onSelectCustomer(customer);
   };
@@ -72,7 +72,7 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
   };
 
   const getDisplayName = (customer) => {
-    return customer.full_name || customer.username || 'İsimsiz Kullanıcı';
+    return customer.full_name || 'İsimsiz Müşteri';
   };
 
   return (
@@ -109,12 +109,10 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
               <div className="font-medium text-gray-800">
                 {getDisplayName(customer)}
               </div>
-              <div className="text-sm text-gray-500">{customer.email}</div>
-              {customer.role && (
-                <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded mt-1 inline-block">
-                  {customer.role}
-                </span>
-              )}
+              <div className="text-sm text-gray-600">{customer.company_name}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                Vergi No: {customer.tax_number}
+              </div>
             </button>
           ))}
         </div>
@@ -133,7 +131,10 @@ export default function CustomerSearch({ selectedCustomer, onSelectCustomer }) {
               <p className="font-semibold text-blue-900">
                 {getDisplayName(selectedCustomer)}
               </p>
-              <p className="text-sm text-blue-700">{selectedCustomer.email}</p>
+              <p className="text-sm text-blue-700">{selectedCustomer.company_name}</p>
+              <p className="text-xs text-blue-600 mt-1">
+                Vergi No: {selectedCustomer.tax_number}
+              </p>
             </div>
             <button
               type="button"

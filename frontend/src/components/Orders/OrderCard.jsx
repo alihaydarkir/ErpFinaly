@@ -49,8 +49,13 @@ export default function OrderCard({ order, onComplete, onCancel, onView, isPendi
       {/* Customer Info */}
       <div className="mb-3">
         <p className="text-sm text-gray-600">
-          <span className="font-medium">Müşteri:</span> {order.user_name || order.customer_name || 'Bilinmiyor'}
+          <span className="font-medium">Müşteri:</span> {order.customer_name || order.user_name || 'Bilinmiyor'}
         </p>
+        {order.customer_company && (
+          <p className="text-xs text-gray-500 mt-1">
+            <span className="font-medium">Şirket:</span> {order.customer_company}
+          </p>
+        )}
       </div>
 
       {/* Products */}

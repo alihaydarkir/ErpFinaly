@@ -13,7 +13,7 @@ class Order {
   /**
    * Create a new order
    */
-  static async create({ user_id, items, total_amount, status = 'pending' }) {
+  static async create({ user_id, customer_id, items, total_amount, status = 'pending' }) {
     const client = await pool.connect();
 
     try {
@@ -24,11 +24,11 @@ class Order {
 
       // Create order
       const orderQuery = `
-        INSERT INTO orders (user_id, order_number, total_amount, status)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO orders (user_id, customer_id, order_number, total_amount, status)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
       `;
-      const orderResult = await client.query(orderQuery, [user_id, orderNumber, total_amount, status]);
+      const orderResult = await client.query(orderQuery, [user_id, customer_id, orderNumber, total_amount, status]);
       const order = orderResult.rows[0];
 
       // Create order items
@@ -75,9 +75,18 @@ class Order {
    */
   static async findById(id) {
     const orderQuery = `
-      SELECT o.*, u.full_name as user_name, u.email as user_email
+      SELECT
+        o.*,
+        u.full_name as user_name,
+        u.email as user_email,
+        c.id as customer_id,
+        c.full_name as customer_name,
+        c.company_name as customer_company,
+        c.tax_number as customer_tax_number,
+        c.phone_number as customer_phone
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN customers c ON o.customer_id = c.id
       WHERE o.id = $1
     `;
     const orderResult = await pool.query(orderQuery, [id]);
@@ -110,6 +119,10 @@ class Order {
         o.*,
         u.full_name as user_name,
         u.email as user_email,
+        c.full_name as customer_name,
+        c.company_name as customer_company,
+        c.tax_number as customer_tax_number,
+        c.phone_number as customer_phone,
         COALESCE(
           json_agg(
             json_build_object(
@@ -125,6 +138,7 @@ class Order {
         ) as items
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN customers c ON o.customer_id = c.id
       LEFT JOIN order_items oi ON o.id = oi.order_id
       LEFT JOIN products p ON oi.product_id = p.id
       WHERE 1=1
@@ -156,7 +170,7 @@ class Order {
       paramCount++;
     }
 
-    query += ' GROUP BY o.id, u.full_name, u.email ORDER BY o.created_at DESC';
+    query += ' GROUP BY o.id, u.full_name, u.email, c.full_name, c.company_name, c.tax_number, c.phone_number ORDER BY o.created_at DESC';
 
     if (filters.limit) {
       query += ` LIMIT $${paramCount}`;
