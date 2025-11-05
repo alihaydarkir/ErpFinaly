@@ -59,6 +59,10 @@ const reportRoutes = require('./src/routes/reports');
 const adminRoutes = require('./src/routes/admin');
 const fineTuningRoutes = require('./src/routes/fineTuning');
 const importRoutes = require('./src/routes/import');
+const userProfileRoutes = require('./src/routes/userProfile');
+
+// Serve static files (avatars)
+app.use('/uploads', express.static('uploads'));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -70,6 +74,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/fine-tuning', fineTuningRoutes);
 app.use('/api/import', importRoutes);
+app.use('/api/users', userProfileRoutes);
 
 // Error handling middleware
 const errorHandler = require('./src/middleware/errorHandler');

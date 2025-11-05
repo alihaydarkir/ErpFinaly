@@ -1,15 +1,39 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 /**
- * File Upload Middleware - Configure multer for Excel file uploads
+ * File Upload Middleware - Configure multer for different file types
  */
 
-// Configure storage (memory storage for direct processing)
-const storage = multer.memoryStorage();
+// Ensure upload directories exist
+const uploadDirs = {
+  avatars: path.join(__dirname, '../../uploads/avatars'),
+  excel: path.join(__dirname, '../../uploads/excel')
+};
+
+Object.values(uploadDirs).forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+// Configure storage for avatars (disk storage)
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDirs.avatars);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + req.user.id + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Configure storage for Excel (memory storage for direct processing)
+const excelStorage = multer.memoryStorage();
 
 // File filter - Only allow Excel files
-const fileFilter = (req, file, cb) => {
+const excelFileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
     'application/vnd.ms-excel', // .xls
@@ -25,10 +49,37 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configure multer
+// File filter - Only allow image files
+const imageFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png'
+  ];
+
+  const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(fileExtension)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Sadece resim dosyaları (.jpg, .jpeg, .png) yüklenebilir'), false);
+  }
+};
+
+// Configure multer for Excel uploads
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: excelStorage,
+  fileFilter: excelFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 MB max file size
+  },
+});
+
+// Configure multer for avatar uploads
+const avatarUpload = multer({
+  storage: avatarStorage,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5 MB max file size
   },
@@ -58,5 +109,6 @@ const handleUploadError = (err, req, res, next) => {
 
 module.exports = {
   upload,
+  avatarUpload,
   handleUploadError,
 };
