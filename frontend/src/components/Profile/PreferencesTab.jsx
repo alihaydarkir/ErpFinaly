@@ -87,9 +87,29 @@ const PreferencesTab = ({ profile }) => {
 
     try {
       await updatePreferences(preferences);
+
+      // Apply theme immediately
+      applyTheme(preferences.theme);
+
+      // Save to localStorage
+      localStorage.setItem('userPreferences', JSON.stringify(preferences));
+
       alert('Tercihler başarıyla kaydedildi');
     } catch (error) {
       alert(error.response?.data?.message || 'Tercihler kaydedilemedi');
+    }
+  };
+
+  const applyTheme = (theme) => {
+    // Remove existing theme classes
+    document.body.classList.remove('theme-light', 'theme-dark');
+
+    if (theme === 'auto') {
+      // Use system preference
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+    } else {
+      document.body.classList.add(`theme-${theme}`);
     }
   };
 
@@ -136,35 +156,6 @@ const PreferencesTab = ({ profile }) => {
                 disabled={isLoading}
               />
               <span>Otomatik (Sistem)</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Language Section */}
-        <div className="preference-section">
-          <h4>🌐 Dil</h4>
-          <div className="preference-options">
-            <label className="radio-option">
-              <input
-                type="radio"
-                name="language"
-                value="tr"
-                checked={preferences.language === 'tr'}
-                onChange={handleLanguageChange}
-                disabled={isLoading}
-              />
-              <span>Türkçe</span>
-            </label>
-            <label className="radio-option">
-              <input
-                type="radio"
-                name="language"
-                value="en"
-                checked={preferences.language === 'en'}
-                onChange={handleLanguageChange}
-                disabled={isLoading}
-              />
-              <span>English</span>
             </label>
           </div>
         </div>

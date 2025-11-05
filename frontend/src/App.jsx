@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
@@ -14,6 +15,58 @@ import useAuthStore from './store/authStore';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
+
+  // Load and apply theme on mount
+  useEffect(() => {
+    const loadTheme = () => {
+      try {
+        const savedPrefs = localStorage.getItem('userPreferences');
+        if (savedPrefs) {
+          const prefs = JSON.parse(savedPrefs);
+          const theme = prefs.theme || 'light';
+
+          // Remove existing theme classes
+          document.body.classList.remove('theme-light', 'theme-dark');
+
+          if (theme === 'auto') {
+            // Use system preference
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+          } else {
+            document.body.classList.add(`theme-${theme}`);
+          }
+        } else {
+          // Default to light theme
+          document.body.classList.add('theme-light');
+        }
+      } catch (error) {
+        console.error('Failed to load theme:', error);
+        document.body.classList.add('theme-light');
+      }
+    };
+
+    loadTheme();
+
+    // Listen for system theme changes when using auto mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      try {
+        const savedPrefs = localStorage.getItem('userPreferences');
+        if (savedPrefs) {
+          const prefs = JSON.parse(savedPrefs);
+          if (prefs.theme === 'auto') {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(mediaQuery.matches ? 'theme-dark' : 'theme-light');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to handle theme change:', error);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   return (
     <Router>

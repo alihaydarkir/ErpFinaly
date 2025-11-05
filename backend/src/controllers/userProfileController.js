@@ -96,8 +96,7 @@ const updateProfile = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { updated_fields: Object.keys(req.body) }
+      changes: { updated_fields: Object.keys(req.body) }
     });
 
     res.json(formatSuccess(result.rows[0], 'Profile updated successfully'));
@@ -154,8 +153,7 @@ const uploadAvatar = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { avatar_url: avatarUrl }
+      changes: { avatar_url: avatarUrl }
     });
 
     res.json(formatSuccess(result.rows[0], 'Avatar uploaded successfully'));
@@ -220,8 +218,7 @@ const changePassword = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: {}
+      changes: {}
     });
 
     res.json(formatSuccess(null, 'Password changed successfully'));
@@ -255,8 +252,7 @@ const updatePreferences = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { preferences }
+      changes: { preferences }
     });
 
     res.json(formatSuccess(result.rows[0], 'Preferences updated successfully'));
@@ -277,7 +273,7 @@ const getActivityHistory = async (req, res) => {
     let query = `
       SELECT
         id, action, entity_type, entity_id,
-        details, ip_address, created_at
+        changes as details, ip_address, created_at
       FROM audit_logs
       WHERE user_id = $1
     `;
@@ -353,8 +349,7 @@ const enable2FA = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: {}
+      changes: {}
     });
 
     res.json(formatSuccess(result.rows[0], '2FA enabled successfully'));
@@ -387,8 +382,7 @@ const disable2FA = async (req, res) => {
       entity_type: 'user',
       entity_id: userId,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: {}
+      changes: {}
     });
 
     res.json(formatSuccess(result.rows[0], '2FA disabled successfully'));
