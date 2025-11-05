@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import CustomerForm from '../components/Customers/CustomerForm';
 import CustomerList from '../components/Customers/CustomerList';
+import ImportCustomersDialog from '../components/Customers/ImportCustomersDialog';
 import { customerService } from '../services/customerService';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -146,26 +148,34 @@ export default function CustomersPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowImportDialog(true)}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Yeni Müşteri Ekle
-        </button>
+            📥 Excel'den Yükle
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Yeni Müşteri Ekle
+          </button>
+        </div>
       </div>
 
       {/* Customer List */}
@@ -217,6 +227,13 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
+
+      {/* Import Dialog */}
+      <ImportCustomersDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onSuccess={fetchCustomers}
+      />
     </div>
   );
 }

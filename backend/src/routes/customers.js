@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
+const { upload, handleUploadError } = require('../middleware/fileUpload');
 const { validate, customerSchemas, querySchemas } = require('../utils/validators');
 const {
   getAllCustomers,
@@ -9,6 +10,14 @@ const {
   updateCustomer,
   deleteCustomer
 } = require('../controllers/customerController');
+const {
+  validateCustomerImport,
+  processCustomerImport
+} = require('../controllers/customerImportController');
+
+// Customer import endpoints
+router.post('/import/validate', authMiddleware, upload.single('file'), handleUploadError, validateCustomerImport);
+router.post('/import/process', authMiddleware, processCustomerImport);
 
 // All customer endpoints require authentication
 router.get('/', authMiddleware, validate(querySchemas.customerFilters, 'query'), getAllCustomers);
