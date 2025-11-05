@@ -73,8 +73,7 @@ const updateSetting = async (req, res) => {
       entity_type: 'system_settings',
       entity_id: setting.id,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { key, old_value: existing.value, new_value: value }
+      changes: { key, old_value: existing.value, new_value: value }
     });
 
     res.json(formatSuccess(setting, 'Setting updated successfully'));
@@ -101,8 +100,7 @@ const bulkUpdateSettings = async (req, res) => {
       entity_type: 'system_settings',
       entity_id: null,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { count: updatedSettings.length, keys: Object.keys(settings) }
+      changes: { count: updatedSettings.length, keys: Object.keys(settings) }
     });
 
     res.json(formatSuccess(updatedSettings, 'Settings updated successfully'));
@@ -158,8 +156,7 @@ const testEmail = async (req, res) => {
       entity_type: 'system_settings',
       entity_id: null,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { to: to || req.user.email, messageId: info.messageId }
+      changes: { to: to || req.user.email, messageId: info.messageId }
     });
 
     res.json(formatSuccess({ messageId: info.messageId }, 'Test email sent successfully'));
@@ -186,8 +183,7 @@ const createSetting = async (req, res) => {
       entity_type: 'system_settings',
       entity_id: setting.id,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { key: setting.key }
+      changes: { key: setting.key }
     });
 
     res.status(201).json(formatSuccess(setting, 'Setting created successfully'));
@@ -223,8 +219,7 @@ const deleteSetting = async (req, res) => {
       entity_type: 'system_settings',
       entity_id: setting.id,
       ip_address: getClientIP(req),
-      user_agent: req.get('user-agent'),
-      details: { key }
+      changes: { key }
     });
 
     res.json(formatSuccess(null, 'Setting deleted successfully'));
