@@ -55,7 +55,6 @@ const productSchemas = {
 // Order validation schemas
 const orderSchemas = {
   create: Joi.object({
-    user_id: Joi.number().integer().required(),
     customer_id: Joi.number().integer().optional().allow(null),
     items: Joi.array().items(
       Joi.object({

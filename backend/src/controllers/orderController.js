@@ -68,7 +68,10 @@ const getOrderById = async (req, res) => {
  */
 const createOrder = async (req, res) => {
   try {
-    const { user_id, items, total_amount, status = 'pending' } = req.body;
+    const { customer_id, items, total_amount, status = 'pending' } = req.body;
+
+    // Get user from auth middleware
+    const user_id = req.user.id;
 
     // Validate user exists
     const user = await User.findById(user_id);
@@ -78,6 +81,7 @@ const createOrder = async (req, res) => {
 
     const order = await Order.create({
       user_id,
+      customer_id,
       items,
       total_amount,
       status

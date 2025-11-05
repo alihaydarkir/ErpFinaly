@@ -66,9 +66,7 @@ export default function OrderDrawer({ isOpen, onClose, onSuccess }) {
       const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
       // Create order
-      const user = JSON.parse(localStorage.getItem('user'));
       await orderService.create({
-        user_id: user.id,
         customer_id: selectedCustomer.id,
         items: items,
         total_amount: totalAmount,
