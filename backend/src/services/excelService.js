@@ -7,7 +7,7 @@ class ExcelService {
   /**
    * Expected header format for products
    */
-  static EXPECTED_HEADERS = ['Ürün Adı', 'Kategori', 'Fiyat', 'Stok Miktarı', 'Açıklama'];
+  static EXPECTED_HEADERS = ['Ürün Adı', 'Kategori', 'Fiyat', 'Stok Miktarı', 'Açıklama', 'Düşük Stok Limiti'];
 
   /**
    * Expected header format for customers
@@ -70,6 +70,7 @@ class ExcelService {
         price: this.parseNumber(row[2]),
         stock: this.parseInteger(row[3]),
         description: this.cleanString(row[4]),
+        low_stock_threshold: this.parseInteger(row[5]) || 10,
       }));
 
       return {

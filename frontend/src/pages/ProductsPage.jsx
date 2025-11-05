@@ -17,6 +17,7 @@ export default function ProductsPage() {
     stock: '',
     category: '',
     sku: '',
+    low_stock_threshold: '10',
   });
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function ProductsPage() {
       stock: product.stock,
       category: product.category,
       sku: product.sku,
+      low_stock_threshold: product.low_stock_threshold || '10',
     });
     setShowModal(true);
   };
@@ -90,6 +92,7 @@ export default function ProductsPage() {
       stock: '',
       category: '',
       sku: '',
+      low_stock_threshold: '10',
     });
     setEditingProduct(null);
   };
@@ -277,6 +280,22 @@ export default function ProductsPage() {
                   className="px-4 py-2 border rounded-lg"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Düşük Stok Limiti
+                </label>
+                <input
+                  type="number"
+                  placeholder="Minimum stok miktarı"
+                  value={formData.low_stock_threshold}
+                  onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Stok bu değerin altına düştüğünde uyarı verilecektir
+                </p>
               </div>
               <div className="flex space-x-3">
                 <button

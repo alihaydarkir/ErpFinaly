@@ -34,7 +34,8 @@ const productSchemas = {
     price: Joi.number().min(0).required(),
     stock: Joi.number().integer().min(0).required(),
     category: Joi.string().max(100).allow('', null),
-    sku: Joi.string().max(100).required()
+    sku: Joi.string().max(100).required(),
+    low_stock_threshold: Joi.number().integer().min(0).default(10)
   }),
 
   update: Joi.object({
@@ -43,7 +44,8 @@ const productSchemas = {
     price: Joi.number().min(0),
     stock: Joi.number().integer().min(0),
     category: Joi.string().max(100).allow('', null),
-    sku: Joi.string().max(100)
+    sku: Joi.string().max(100),
+    low_stock_threshold: Joi.number().integer().min(0)
   }).min(1),
 
   updateStock: Joi.object({

@@ -85,6 +85,15 @@ class BulkImportService {
         errors.push('Açıklama maksimum 500 karakter olabilir');
       }
 
+      // Validate Düşük Stok Limiti (Low Stock Threshold) - optional
+      if (row.low_stock_threshold !== null && row.low_stock_threshold !== undefined) {
+        if (!Number.isInteger(row.low_stock_threshold) || row.low_stock_threshold < 0) {
+          errors.push('Düşük stok limiti 0 veya pozitif bir tam sayı olmalıdır');
+        } else if (row.low_stock_threshold > 9999) {
+          errors.push('Düşük stok limiti maksimum 9999 olabilir');
+        }
+      }
+
       const isValid = errors.length === 0;
       if (isValid) validRows++;
       else invalidRows++;
@@ -131,8 +140,8 @@ class BulkImportService {
 
           // Insert product
           const productQuery = `
-            INSERT INTO products (name, sku, category, price, stock_quantity, description, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+            INSERT INTO products (name, sku, category, price, stock_quantity, description, low_stock_threshold, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
             RETURNING id, name
           `;
 
@@ -143,6 +152,7 @@ class BulkImportService {
             item.price,
             item.stock,
             item.description || null,
+            item.low_stock_threshold || 10,
           ]);
 
           successful++;

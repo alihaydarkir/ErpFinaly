@@ -4,14 +4,14 @@ class Product {
   /**
    * Create a new product
    */
-  static async create({ name, description, price, stock, category, sku }) {
+  static async create({ name, description, price, stock, category, sku, low_stock_threshold = 10 }) {
     const query = `
-      INSERT INTO products (name, description, price, stock_quantity, category, sku)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO products (name, description, price, stock_quantity, category, sku, low_stock_threshold)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
 
-    const values = [name, description, price, stock, category, sku];
+    const values = [name, description, price, stock, category, sku, low_stock_threshold];
     const result = await pool.query(query, values);
     return result.rows[0];
   }
@@ -106,7 +106,7 @@ class Product {
     const values = [];
     let paramCount = 1;
 
-    const allowedFields = ['name', 'description', 'price', 'stock_quantity', 'category', 'sku'];
+    const allowedFields = ['name', 'description', 'price', 'stock_quantity', 'category', 'sku', 'low_stock_threshold'];
 
     for (const field of allowedFields) {
       if (data[field] !== undefined) {

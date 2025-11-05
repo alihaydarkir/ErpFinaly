@@ -78,7 +78,7 @@ const getProductById = async (req, res) => {
  */
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, category, sku } = req.body;
+    const { name, description, price, stock, category, sku, low_stock_threshold } = req.body;
 
     // Check if SKU already exists
     const existing = await Product.findBySku(sku);
@@ -92,7 +92,8 @@ const createProduct = async (req, res) => {
       price,
       stock,
       category,
-      sku
+      sku,
+      low_stock_threshold: low_stock_threshold || 10
     });
 
     // Log activity
@@ -124,7 +125,13 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+
+    // Map 'stock' to 'stock_quantity' for model compatibility
+    if (updates.stock !== undefined) {
+      updates.stock_quantity = updates.stock;
+      delete updates.stock;
+    }
 
     const product = await Product.update(id, updates);
 
