@@ -111,8 +111,11 @@ const customerSchemas = {
     company_name: Joi.string().min(3).max(100).required(),
     tax_office: Joi.string().min(3).max(255).required(),
     tax_number: Joi.string().min(10).max(50).required(),
-    phone_number: Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20).optional().allow('', null),
-    company_location: Joi.string().max(255).optional().allow('', null)
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    company_location: Joi.string().max(255).allow('', null).optional()
   }),
 
   update: Joi.object({
@@ -120,8 +123,11 @@ const customerSchemas = {
     company_name: Joi.string().min(3).max(100),
     tax_office: Joi.string().min(3).max(255),
     tax_number: Joi.string().min(10).max(50),
-    phone_number: Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20).allow('', null),
-    company_location: Joi.string().max(255).allow('', null)
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    company_location: Joi.string().max(255).allow('', null).optional()
   }).min(1)
 };
 
