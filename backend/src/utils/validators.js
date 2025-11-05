@@ -104,6 +104,27 @@ const ragSchemas = {
   })
 };
 
+// Customer validation schemas
+const customerSchemas = {
+  create: Joi.object({
+    full_name: Joi.string().min(3).max(100).required(),
+    company_name: Joi.string().min(3).max(100).required(),
+    tax_office: Joi.string().min(3).max(255).required(),
+    tax_number: Joi.string().min(10).max(50).required(),
+    phone_number: Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20).optional().allow('', null),
+    company_location: Joi.string().max(255).optional().allow('', null)
+  }),
+
+  update: Joi.object({
+    full_name: Joi.string().min(3).max(100),
+    company_name: Joi.string().min(3).max(100),
+    tax_office: Joi.string().min(3).max(255),
+    tax_number: Joi.string().min(10).max(50),
+    phone_number: Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20).allow('', null),
+    company_location: Joi.string().max(255).allow('', null)
+  }).min(1)
+};
+
 // Query parameter validation
 const querySchemas = {
   pagination: Joi.object({
@@ -144,6 +165,14 @@ const querySchemas = {
     lowStock: Joi.number().integer().min(0),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  customerFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    search: Joi.string(),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(50),
+    offset: Joi.number().integer().min(0).default(0)
   })
 };
 
@@ -182,6 +211,7 @@ module.exports = {
   orderSchemas,
   chatSchemas,
   ragSchemas,
+  customerSchemas,
   querySchemas,
   validate
 };

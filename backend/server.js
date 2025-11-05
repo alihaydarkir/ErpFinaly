@@ -52,6 +52,7 @@ app.get('/', (req, res) => {
 const authRoutes = require('./src/routes/auth');
 const productRoutes = require('./src/routes/products');
 const orderRoutes = require('./src/routes/orders');
+const customerRoutes = require('./src/routes/customers');
 const chatRoutes = require('./src/routes/chat');
 const reportRoutes = require('./src/routes/reports');
 const adminRoutes = require('./src/routes/admin');
@@ -61,6 +62,7 @@ const importRoutes = require('./src/routes/import');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/customers', customerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);

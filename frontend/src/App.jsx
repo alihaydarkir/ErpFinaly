@@ -3,6 +3,7 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import OrdersPage from './pages/OrdersPage';
+import CustomersPage from './pages/CustomersPage';
 import ChatPage from './pages/ChatPage';
 import ReportsPage from './pages/ReportsPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -46,6 +47,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <OrdersPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CustomersPage />
               </Layout>
             </ProtectedRoute>
           }

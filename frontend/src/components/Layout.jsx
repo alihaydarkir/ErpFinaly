@@ -19,6 +19,7 @@ export default function Layout({ children }) {
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/products', label: 'Ürünler', icon: '📦' },
     { path: '/orders', label: 'Siparişler', icon: '🛒' },
+    { path: '/customers', label: 'Müşteriler', icon: '👥' },
     { path: '/chat', label: 'AI Chatbot', icon: '🤖' },
     { path: '/reports', label: 'Raporlar', icon: '📈' },
   ];
