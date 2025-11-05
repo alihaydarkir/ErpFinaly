@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
+const pool = require('../config/database');
 const emailService = require('../services/emailService');
 const cacheService = require('../services/cacheService');
 const { formatUser, formatSuccess, formatError } = require('../utils/formatters');
@@ -109,8 +110,44 @@ const login = async (req, res) => {
       loginAt: new Date()
     });
 
-    // Log activity
+    // Log activity in audit_logs
     await AuditLog.logLogin(user.id, getClientIP(req));
+
+    // Log login in login_logs table
+    const userAgent = req.get('user-agent') || 'Unknown';
+    const ipAddress = getClientIP(req);
+
+    // Parse device and browser from user agent
+    let device = 'Desktop';
+    let browser = 'Unknown';
+
+    if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
+      device = 'Mobile';
+    } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
+      device = 'Tablet';
+    }
+
+    if (userAgent.includes('Chrome')) {
+      browser = 'Chrome';
+    } else if (userAgent.includes('Firefox')) {
+      browser = 'Firefox';
+    } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+      browser = 'Safari';
+    } else if (userAgent.includes('Edge')) {
+      browser = 'Edge';
+    }
+
+    await pool.query(`
+      INSERT INTO login_logs (user_id, ip_address, user_agent, device, browser, location, success)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [user.id, ipAddress, userAgent, device, browser, 'Unknown', true]);
+
+    // Update user last_login and login_count
+    await pool.query(`
+      UPDATE users
+      SET last_login = NOW(), login_count = COALESCE(login_count, 0) + 1
+      WHERE id = $1
+    `, [user.id]);
 
     console.log(`User logged in: ${user.username} (${user.id})`);
 

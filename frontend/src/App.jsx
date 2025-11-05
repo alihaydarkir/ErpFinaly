@@ -18,31 +18,30 @@ function App() {
 
   // Load and apply theme on mount
   useEffect(() => {
+    const applyTheme = (theme) => {
+      if (theme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+      } else if (theme === 'auto') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      } else {
+        document.body.setAttribute('data-theme', 'light');
+      }
+    };
+
     const loadTheme = () => {
       try {
         const savedPrefs = localStorage.getItem('userPreferences');
-        const root = document.documentElement;
-
         if (savedPrefs) {
           const prefs = JSON.parse(savedPrefs);
           const theme = prefs.theme || 'light';
-
-          // Remove dark class
-          root.classList.remove('dark');
-
-          if (theme === 'dark') {
-            root.classList.add('dark');
-          } else if (theme === 'auto') {
-            // Use system preference
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (isDark) {
-              root.classList.add('dark');
-            }
-          }
+          applyTheme(theme);
+        } else {
+          document.body.setAttribute('data-theme', 'light');
         }
-        // Default is light (no class needed)
       } catch (error) {
         console.error('Failed to load theme:', error);
+        document.body.setAttribute('data-theme', 'light');
       }
     };
 
@@ -56,11 +55,7 @@ function App() {
         if (savedPrefs) {
           const prefs = JSON.parse(savedPrefs);
           if (prefs.theme === 'auto') {
-            const root = document.documentElement;
-            root.classList.remove('dark');
-            if (mediaQuery.matches) {
-              root.classList.add('dark');
-            }
+            applyTheme('auto');
           }
         }
       } catch (error) {

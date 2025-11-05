@@ -70,21 +70,14 @@ const PreferencesTab = ({ profile }) => {
   };
 
   const applyTheme = (theme) => {
-    const root = document.documentElement;
-
-    // Remove existing theme class
-    root.classList.remove('dark');
-
     if (theme === 'dark') {
-      root.classList.add('dark');
+      document.body.setAttribute('data-theme', 'dark');
     } else if (theme === 'auto') {
-      // Use system preference
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (isDark) {
-        root.classList.add('dark');
-      }
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    } else {
+      document.body.setAttribute('data-theme', 'light');
     }
-    // 'light' theme doesn't need any class
   };
 
   return (
