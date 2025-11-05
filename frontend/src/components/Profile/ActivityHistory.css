@@ -229,3 +229,54 @@
     gap: 0.25rem;
   }
 }
+
+/* Dark Theme */
+body[data-theme="dark"] .activity-history {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .tab-header h3 {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .filter-input {
+  background-color: #0f172a;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+body[data-theme="dark"] .filter-input:focus {
+  border-color: #3b82f6;
+}
+
+body[data-theme="dark"] .loading-state p,
+body[data-theme="dark"] .empty-state p {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .activity-item {
+  border: 1px solid #334155;
+}
+
+body[data-theme="dark"] .activity-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+body[data-theme="dark"] .activity-action {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .activity-time {
+  color: #64748b;
+}
+
+body[data-theme="dark"] .entity-type,
+body[data-theme="dark"] .entity-id {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .ip-address {
+  color: #64748b;
+}

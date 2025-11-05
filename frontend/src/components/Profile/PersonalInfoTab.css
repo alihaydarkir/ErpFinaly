@@ -149,3 +149,59 @@
     width: 100%;
   }
 }
+
+/* Dark Theme */
+body[data-theme="dark"] .personal-info-tab {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .tab-header h3 {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .form-group label {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .form-group input {
+  background-color: #0f172a;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+body[data-theme="dark"] .form-group input:focus:not(:disabled) {
+  border-color: #3b82f6;
+}
+
+body[data-theme="dark"] .form-group input:disabled,
+body[data-theme="dark"] .form-group input.input-disabled {
+  background: #0a0f1a;
+  color: #64748b;
+}
+
+body[data-theme="dark"] .form-group small {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .form-actions {
+  border-top: 1px solid #334155;
+}
+
+body[data-theme="dark"] .btn-cancel {
+  background: #1e293b;
+  color: #f1f5f9;
+  border: 1px solid #475569;
+}
+
+body[data-theme="dark"] .btn-cancel:hover:not(:disabled) {
+  background: #334155;
+}
+
+body[data-theme="dark"] .btn-save {
+  background: #10b981;
+}
+
+body[data-theme="dark"] .btn-save:hover:not(:disabled) {
+  background: #059669;
+}

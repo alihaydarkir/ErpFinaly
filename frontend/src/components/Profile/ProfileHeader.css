@@ -9,6 +9,11 @@
   margin-bottom: 2rem;
 }
 
+body[data-theme="dark"] .profile-header {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
 .profile-avatar-container {
   position: relative;
 }
@@ -85,10 +90,18 @@
   color: #333;
 }
 
+body[data-theme="dark"] .profile-info h2 {
+  color: #f1f5f9;
+}
+
 .profile-email {
   margin: 0 0 1rem 0;
   color: #666;
   font-size: 1rem;
+}
+
+body[data-theme="dark"] .profile-email {
+  color: #cbd5e1;
 }
 
 .profile-badges {

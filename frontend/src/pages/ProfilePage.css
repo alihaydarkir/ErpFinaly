@@ -221,3 +221,50 @@
     display: none;
   }
 }
+
+/* Dark Theme */
+body[data-theme="dark"] .loading-container p {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .profile-2fa-section {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .2fa-content h4 {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .2fa-content p {
+  color: #cbd5e1;
+}
+
+body[data-theme="dark"] .profile-tabs-container {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .profile-tabs {
+  border-bottom: 2px solid #334155;
+  background: #1e293b;
+}
+
+body[data-theme="dark"] .tab-button {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .tab-button:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .tab-button.active {
+  color: #60a5fa;
+  background: #0f172a;
+  border-bottom-color: #3b82f6;
+}
+
+body[data-theme="dark"] .tab-content {
+  background: #0f172a;
+}

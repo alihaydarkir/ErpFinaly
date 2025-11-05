@@ -254,3 +254,82 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark Theme */
+body[data-theme="dark"] .login-history {
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .tab-header h3 {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .loading-state p,
+body[data-theme="dark"] .empty-state p {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .login-table {
+  background-color: #1e293b;
+}
+
+body[data-theme="dark"] .login-table th {
+  background: #334155;
+  color: #f1f5f9;
+  border-bottom: 2px solid #475569;
+}
+
+body[data-theme="dark"] .login-table td {
+  color: #cbd5e1;
+  border-bottom: 1px solid #334155;
+}
+
+body[data-theme="dark"] .login-table tr:hover {
+  background: #334155;
+}
+
+body[data-theme="dark"] .login-table tr.failed-login {
+  background: #450a0a;
+}
+
+body[data-theme="dark"] .login-table tr.failed-login:hover {
+  background: #5f1010;
+}
+
+body[data-theme="dark"] .date-cell {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .ip-cell code {
+  background: #334155;
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .location-cell {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .login-stats {
+  border-top: 1px solid #334155;
+}
+
+body[data-theme="dark"] .stat-card {
+  background: #334155;
+}
+
+body[data-theme="dark"] .stat-label {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .stat-value {
+  color: #f1f5f9;
+}
+
+body[data-theme="dark"] .stat-value.success {
+  color: #4ade80;
+}
+
+body[data-theme="dark"] .stat-value.failed {
+  color: #f87171;
+}
