@@ -4,8 +4,7 @@ import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import OrdersPage from './pages/OrdersPage';
 import CustomersPage from './pages/CustomersPage';
-import SuppliersPage from './pages/SuppliersPage';
-import PurchaseOrdersPage from './pages/PurchaseOrdersPage';
+import SettingsPage from './pages/SettingsPage';
 import ChatPage from './pages/ChatPage';
 import ReportsPage from './pages/ReportsPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -64,21 +63,11 @@ function App() {
           }
         />
         <Route
-          path="/suppliers"
+          path="/settings"
           element={
             <ProtectedRoute>
               <Layout>
-                <SuppliersPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/purchase-orders"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <PurchaseOrdersPage />
+                <SettingsPage />
               </Layout>
             </ProtectedRoute>
           }

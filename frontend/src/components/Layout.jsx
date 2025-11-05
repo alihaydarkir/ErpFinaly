@@ -15,16 +15,25 @@ export default function Layout({ children }) {
     navigate('/login');
   };
 
-  const menuItems = [
+  // Base menu items for all users
+  const baseMenuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/products', label: 'Ürünler', icon: '📦' },
     { path: '/orders', label: 'Siparişler', icon: '🛒' },
     { path: '/customers', label: 'Müşteriler', icon: '👥' },
-    { path: '/suppliers', label: 'Tedarikçiler', icon: '🏭' },
-    { path: '/purchase-orders', label: 'Satın Alma', icon: '📋' },
     { path: '/chat', label: 'AI Chatbot', icon: '🤖' },
     { path: '/reports', label: 'Raporlar', icon: '📈' },
   ];
+
+  // Admin-only menu items
+  const adminMenuItems = [
+    { path: '/settings', label: 'Ayarlar', icon: '⚙️' }
+  ];
+
+  // Combine menu items based on user role
+  const menuItems = user?.role === 'admin'
+    ? [...baseMenuItems, ...adminMenuItems]
+    : baseMenuItems;
 
   return (
     <div className="min-h-screen bg-gray-100">
