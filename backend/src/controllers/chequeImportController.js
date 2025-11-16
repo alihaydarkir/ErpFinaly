@@ -101,7 +101,7 @@ const validateExcelData = async (data, userId) => {
         continue;
       }
 
-      // Find or validate customer
+       // Find or create customer
       let customerId = null;
       const customerIdentifier = row['Müşteri'];
 
@@ -109,12 +109,26 @@ const validateExcelData = async (data, userId) => {
       const customers = await Customer.findAll({ user_id: userId, search: customerIdentifier });
 
       if (customers.length === 0) {
-        errors.push({
-          row: rowNum,
-          error: `Customer not found: ${customerIdentifier}. Please create customer first.`,
-          data: row
-        });
-        continue;
+        // Customer not found - auto-create with minimal info
+        try {
+          const newCustomer = await Customer.create({
+            user_id: userId,
+            full_name: customerIdentifier,
+            company_name: customerIdentifier,
+            tax_office: 'Unknown',
+            tax_number: '0000000000',
+            phone_number: null,
+            company_location: null
+          });
+          customerId = newCustomer.id;
+        } catch (createError) {
+          errors.push({
+            row: rowNum,
+            error: `Failed to auto-create customer: ${customerIdentifier}. ${createError.message}`,
+            data: row
+          });
+          continue;
+        }
       } else if (customers.length > 1) {
         errors.push({
           row: rowNum,
