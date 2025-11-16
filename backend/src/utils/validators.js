@@ -34,7 +34,8 @@ const productSchemas = {
     price: Joi.number().min(0).required(),
     stock: Joi.number().integer().min(0).required(),
     category: Joi.string().max(100).allow('', null),
-    sku: Joi.string().max(100).required()
+    sku: Joi.string().max(100).required(),
+    low_stock_threshold: Joi.number().integer().min(0).default(10)
   }),
 
   update: Joi.object({
@@ -43,7 +44,8 @@ const productSchemas = {
     price: Joi.number().min(0),
     stock: Joi.number().integer().min(0),
     category: Joi.string().max(100).allow('', null),
-    sku: Joi.string().max(100)
+    sku: Joi.string().max(100),
+    low_stock_threshold: Joi.number().integer().min(0)
   }).min(1),
 
   updateStock: Joi.object({
@@ -55,7 +57,7 @@ const productSchemas = {
 // Order validation schemas
 const orderSchemas = {
   create: Joi.object({
-    user_id: Joi.number().integer().required(),
+    customer_id: Joi.number().integer().optional().allow(null),
     items: Joi.array().items(
       Joi.object({
         product_id: Joi.number().integer().required(),
@@ -64,16 +66,17 @@ const orderSchemas = {
       })
     ).min(1).required(),
     total_amount: Joi.number().min(0).required(),
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').default('pending')
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').default('pending')
   }),
 
   update: Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
+    customer_id: Joi.number().integer().optional().allow(null),
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
     total_amount: Joi.number().min(0)
   }).min(1),
 
   updateStatus: Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').required()
+    status: Joi.string().valid('pending', 'completed', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded').required()
   }),
 
   cancel: Joi.object({
@@ -102,6 +105,33 @@ const ragSchemas = {
     limit: Joi.number().integer().min(1).max(20).default(5),
     threshold: Joi.number().min(0).max(1).default(0.7)
   })
+};
+
+// Customer validation schemas
+const customerSchemas = {
+  create: Joi.object({
+    full_name: Joi.string().min(3).max(100).required(),
+    company_name: Joi.string().min(3).max(100).required(),
+    tax_office: Joi.string().min(3).max(255).required(),
+    tax_number: Joi.string().min(10).max(50).required(),
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    company_location: Joi.string().max(255).allow('', null).optional()
+  }),
+
+  update: Joi.object({
+    full_name: Joi.string().min(3).max(100),
+    company_name: Joi.string().min(3).max(100),
+    tax_office: Joi.string().min(3).max(255),
+    tax_number: Joi.string().min(10).max(50),
+    phone_number: Joi.alternatives().try(
+      Joi.string().valid('', null),
+      Joi.string().pattern(/^[0-9+\-() ]+$/).min(10).max(20)
+    ),
+    company_location: Joi.string().max(255).allow('', null).optional()
+  }).min(1)
 };
 
 // Query parameter validation
@@ -144,6 +174,14 @@ const querySchemas = {
     lowStock: Joi.number().integer().min(0),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20)
+  }),
+
+  customerFilters: Joi.object({
+    user_id: Joi.number().integer(),
+    search: Joi.string(),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(1000).default(50),
+    offset: Joi.number().integer().min(0).default(0)
   })
 };
 
@@ -182,6 +220,7 @@ module.exports = {
   orderSchemas,
   chatSchemas,
   ragSchemas,
+  customerSchemas,
   querySchemas,
   validate
 };
