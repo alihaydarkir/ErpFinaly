@@ -137,9 +137,9 @@ const customerSchemas = {
 // Query parameter validation
 const querySchemas = {
   pagination: Joi.object({
-    limit: Joi.number().integer().min(1).max(100).default(20),
+    limit: Joi.number().integer().min(1).max(10000).default(20),
     offset: Joi.number().integer().min(0).default(0)
-  }),
+  }).unknown(true),
 
   dateRange: Joi.object({
     start_date: Joi.date().iso(),
@@ -154,8 +154,8 @@ const querySchemas = {
     maxPrice: Joi.number().min(0),
     lowStock: Joi.number().integer().min(0),
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20)
-  }),
+    limit: Joi.number().integer().min(1).max(10000).default(20)
+  }).unknown(true),
 
   orderFilters: Joi.object({
     user_id: Joi.number().integer(),
@@ -163,8 +163,8 @@ const querySchemas = {
     start_date: Joi.date().iso(),
     end_date: Joi.date().iso(),
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20)
-  }),
+    limit: Joi.number().integer().min(1).max(10000).default(20)
+  }).unknown(true),
 
   productFilters: Joi.object({
     category: Joi.string(),
@@ -173,16 +173,16 @@ const querySchemas = {
     maxPrice: Joi.number().min(0),
     lowStock: Joi.number().integer().min(0),
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20)
-  }),
+    limit: Joi.number().integer().min(1).max(10000).default(20)
+  }).unknown(true),
 
   customerFilters: Joi.object({
     user_id: Joi.number().integer(),
     search: Joi.string(),
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(50),
+    limit: Joi.number().integer().min(1).max(10000).default(50),
     offset: Joi.number().integer().min(0).default(0)
-  })
+  }).unknown(true)
 };
 
 /**
