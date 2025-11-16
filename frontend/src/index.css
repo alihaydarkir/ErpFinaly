@@ -328,3 +328,13 @@ body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     transform: translateY(-10px);
   }
 }
+
+/* Dashboard gradient cards - consistent in both themes */
+body[data-theme="dark"] .bg-gradient-to-br {
+  /* Gradients remain vibrant in dark theme */
+}
+
+/* Dashboard white cards need dark theme */
+body[data-theme="dark"] .bg-white.rounded-xl {
+  background-color: #1e293b !important;
+}

@@ -55,29 +55,25 @@ export default function DashboardPage() {
       title: 'Toplam Ürün',
       value: stats.totalProducts,
       icon: '📦',
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
+      gradient: 'from-blue-500 to-blue-600',
     },
     {
       title: 'Toplam Sipariş',
       value: stats.totalOrders,
       icon: '🛒',
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
+      gradient: 'from-green-500 to-green-600',
     },
     {
       title: 'Düşük Stok Uyarısı',
       value: stats.lowStockProducts,
       icon: '⚠️',
-      color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
+      gradient: 'from-yellow-500 to-yellow-600',
     },
     {
       title: 'Toplam Gelir',
       value: `₺${stats.totalRevenue.toFixed(2)}`,
       icon: '💰',
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
+      gradient: 'from-purple-500 to-purple-600',
     },
   ];
 
@@ -104,15 +100,11 @@ export default function DashboardPage() {
         {kpiCards.map((card, index) => (
           <div
             key={index}
-            className={`${card.bgColor} rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition`}
+            className={`bg-gradient-to-br ${card.gradient} p-6 rounded-xl text-white shadow-lg hover:shadow-xl transition`}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 ${card.color} rounded-lg flex items-center justify-center text-2xl`}>
-                {card.icon}
-              </div>
-              <div className="text-3xl font-bold text-gray-800">{card.value}</div>
-            </div>
-            <h3 className="text-gray-600 font-medium">{card.title}</h3>
+            <div className="text-3xl mb-2">{card.icon}</div>
+            <h3 className="text-sm font-medium opacity-90 mb-1">{card.title}</h3>
+            <p className="text-3xl font-bold">{card.value}</p>
           </div>
         ))}
       </div>

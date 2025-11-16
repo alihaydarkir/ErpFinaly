@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import ProductsPage from './pages/ProductsPage';
 import OrdersPage from './pages/OrdersPage';
 import CustomersPage from './pages/CustomersPage';
+import ChequesPage from './pages/ChequesPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import ChatPage from './pages/ChatPage';
@@ -111,6 +112,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <CustomersPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cheques"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChequesPage />
               </Layout>
             </ProtectedRoute>
           }
