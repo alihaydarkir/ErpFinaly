@@ -56,7 +56,6 @@ const chatRoutes = require('./src/routes/chat');
 const reportRoutes = require('./src/routes/reports');
 const adminRoutes = require('./src/routes/admin');
 const fineTuningRoutes = require('./src/routes/fineTuning');
-const chequeRoutes = require('./src/routes/cheques');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -65,7 +64,6 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/fine-tuning', fineTuningRoutes);
-app.use('/api/cheques', chequeRoutes);
 
 // Error handling middleware
 const errorHandler = require('./src/middleware/errorHandler');
