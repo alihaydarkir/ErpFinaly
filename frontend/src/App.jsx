@@ -5,6 +5,7 @@ import ProductsPage from './pages/ProductsPage';
 import OrdersPage from './pages/OrdersPage';
 import ChatPage from './pages/ChatPage';
 import ReportsPage from './pages/ReportsPage';
+import ChequesPage from './pages/ChequesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import useAuthStore from './store/authStore';
@@ -66,6 +67,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ReportsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cheques"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ChequesPage />
               </Layout>
             </ProtectedRoute>
           }
