@@ -47,7 +47,7 @@ class Cheque {
         c.phone_number as customer_phone,
         u.username as user_name,
         u.email as user_email,
-        EXTRACT(DAY FROM (ch.due_date - CURRENT_DATE)) as days_until_due
+        (ch.due_date - CURRENT_DATE) as days_until_due
       FROM cheques ch
       LEFT JOIN customers c ON ch.customer_id = c.id
       LEFT JOIN users u ON ch.user_id = u.id
@@ -80,7 +80,7 @@ class Cheque {
         ch.*,
         c.company_name as customer_company_name,
         c.full_name as customer_contact_name,
-        EXTRACT(DAY FROM (ch.due_date - CURRENT_DATE)) as days_until_due
+        (ch.due_date - CURRENT_DATE) as days_until_due
       FROM cheques ch
       LEFT JOIN customers c ON ch.customer_id = c.id
       WHERE 1=1
@@ -281,7 +281,7 @@ class Cheque {
         ch.*,
         c.company_name as customer_company_name,
         c.full_name as customer_contact_name,
-        EXTRACT(DAY FROM (ch.due_date - CURRENT_DATE)) as days_until_due
+        (ch.due_date - CURRENT_DATE) as days_until_due
       FROM cheques ch
       LEFT JOIN customers c ON ch.customer_id = c.id
       WHERE ch.user_id = $1
@@ -304,7 +304,7 @@ class Cheque {
         ch.*,
         c.company_name as customer_company_name,
         c.full_name as customer_contact_name,
-        EXTRACT(DAY FROM (CURRENT_DATE - ch.due_date)) as days_overdue
+        (CURRENT_DATE - ch.due_date) as days_overdue
       FROM cheques ch
       LEFT JOIN customers c ON ch.customer_id = c.id
       WHERE ch.user_id = $1
