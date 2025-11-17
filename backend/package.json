@@ -22,6 +22,7 @@
   "author": "Ali Haydar Kır",
   "license": "PROPRIETARY",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.6.0",
     "bcrypt": "^5.1.0",
     "bull": "^4.11.0",
