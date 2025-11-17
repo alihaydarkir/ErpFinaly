@@ -61,6 +61,7 @@ const fineTuningRoutes = require('./src/routes/fineTuning');
 const importRoutes = require('./src/routes/import');
 const userProfileRoutes = require('./src/routes/userProfile');
 const chequeRoutes = require('./src/routes/cheques');
+const twoFaRoutes = require('./src/routes/twoFa');
 
 // Serve static files (avatars)
 app.use('/uploads', express.static('uploads'));
@@ -77,6 +78,7 @@ app.use('/api/fine-tuning', fineTuningRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/users', userProfileRoutes);
 app.use('/api/cheques', chequeRoutes);
+app.use('/api/2fa', twoFaRoutes);
 
 // Error handling middleware
 const errorHandler = require('./src/middleware/errorHandler');

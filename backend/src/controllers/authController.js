@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const User2FA = require('../models/User2FA');
 const AuditLog = require('../models/AuditLog');
 const pool = require('../config/database');
 const emailService = require('../services/emailService');
@@ -87,6 +88,26 @@ const login = async (req, res) => {
     const isValidPassword = await User.verifyPassword(password, user.password_hash);
     if (!isValidPassword) {
       return res.status(401).json(formatError('Invalid credentials'));
+    }
+
+    // Check if user has 2FA enabled
+    const twoFaStatus = await User2FA.getStatus(user.id);
+    if (twoFaStatus && twoFaStatus.is_enabled) {
+      // Generate temporary token for 2FA verification (valid for 5 minutes)
+      const tempToken = jwt.sign(
+        { userId: user.id, username: user.username, purpose: '2fa_verification' },
+        process.env.JWT_SECRET,
+        { expiresIn: '5m' }
+      );
+
+      console.log(`User login attempt with 2FA: ${user.username} (${user.id})`);
+
+      return res.status(200).json(formatSuccess({
+        userId: user.id,
+        username: user.username,
+        tempToken,
+        requiresTwoFa: true
+      }, '2FA verification required'));
     }
 
     // Generate tokens
